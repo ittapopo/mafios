@@ -1,0 +1,15 @@
+{
+    "extends": [
+      "next",
+      "next/core-web-vitals",
+      "eslint:recommended",
+      "plugin:prettier/recommended"
+    ],
+    "rules": {
+      "prettier/prettier": ["error"],
+      // Add any custom ESLint rules you want to enforce
+      "semi": ["error", "always"],
+      "quotes": ["error", "single"]
+    }
+  }
+  
