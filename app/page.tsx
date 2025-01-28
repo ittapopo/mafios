@@ -1,51 +1,77 @@
-import AcmeLogo from '@/app/ui/acme-logo';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { lusitana } from '@/app/ui/fonts';
-import styles from '@/app/ui/home.module.css';
-import Image from 'next/image';
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { UserPlus, LogIn } from 'lucide-react';
 
-export default function Page() {
+const MafiaLanding = () => {
   return (
-    <main className="flex min-h-screen flex-col p-6">
-      <div className={styles.shapes}>
-        <AcmeLogo />
-      </div>
-      <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
-        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
-          <div
-            className="relative w-0 h-0 border-l-[15px] border-r-[15px] border-b-[26px] border-l-transparent border-r-transparent border-b-black" />
-          <p className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}>
-            <strong>Welcome to Acme.</strong> This is the example for the{' '}
-            <a href="https://nextjs.org/learn/" className="text-blue-500">
-              Next.js Learn Course
-            </a>
-            , brought to you by Vercel.
+    <div className="min-h-screen bg-[#2A241D] flex flex-col">
+      {/* Navigation Bar */}
+      <nav className="bg-[#1A150F] p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-[#D4C5B2] text-2xl font-bold">Mafios</h1>
+          <div className="space-x-4">
+            <Button
+              variant="ghost"
+              className="bg-[#8B7355] hover:bg-[#6B563D] text-[#D4C5B2]"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Sign Up
+            </Button>
+            <Button
+              variant="ghost"
+              className="bg-[#8B7355] hover:bg-[#6B563D] text-[#D4C5B2]"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-1 container mx-auto flex flex-col md:flex-row items-center justify-between py-16 px-4">
+        {/* Left Side - Text Content */}
+        <div className="md:w-1/2 space-y-6 text-center md:text-left">
+          <h2 className="text-5xl font-bold text-[#D4C5B2] leading-tight">
+            Welcome to the Family
+          </h2>
+          <p className="text-xl text-[#B8A99A]">
+            Rise through the ranks, build your empire, and become the most powerful Don in the city.
           </p>
-          <Link
-            href="/login"
-            className="flex items-center gap-5 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
-          >
-            <span>Log in</span> <ArrowRightIcon className="w-5 md:w-6" />
-          </Link>
+          <div className="space-x-4">
+            <Button
+              className="bg-[#8B7355] hover:bg-[#6B563D] text-[#D4C5B2] text-lg px-8 py-6"
+            >
+              Start Your Empire
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
-          <Image
-            src="/hero-desktop.png"
-            width={1000}
-            height={760}
-            className="hidden md:block"
-            alt="Screenshots of the dashboard project showing desktop version"
-          />
-          <Image
-            src="/hero-mobile.png"
-            width={560}
-            height={620}
-            className="block md:hidden"
-            alt="Screenshot of the dashboard project showing mobile version"
-          />
+
+        {/* Right Side - Decorative Elements */}
+        <div className="md:w-1/2 mt-8 md:mt-0 relative">
+          <div className="w-64 h-64 md:w-96 md:h-96 bg-[#8B7355] rounded-full opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 blur-3xl" />
+          <div className="relative z-10">
+            {/* Placeholder for mafia-themed image */}
+
+            <div className="w-64 h-64 md:w-96 md:h-96 bg-[#4A3F32] rounded-lg shadow-2xl flex items-center justify-center">
+              <img
+                src="mafia.png"
+                alt="Mafia Theme"
+                className="rounded-lg opacity-80"
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-[#1A150F] text-[#8B7355] py-6">
+        <div className="container mx-auto text-center">
+          <p>© 2025 Stian Inc - All rights reserved</p>
+        </div>
+      </footer>
+    </div>
   );
-}
+};
+
+export default MafiaLanding;
