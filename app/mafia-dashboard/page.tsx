@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/router';
 import TopBanner from './top-banner/top-banner';
+import { LeftNavigationBar } from './left-navigation-bar/left-navigation-bar';
 
 const MafiaDashboard = () => {
     //const router = useRouter();
@@ -39,41 +40,17 @@ const MafiaDashboard = () => {
 
     return (
         <div className="min-h-screen bg-[#2A241D] flex flex-col">
-            {/* Top Banner - Previous code unchanged */}
+            {/* Top Banne */}
             <TopBanner />
 
             {/* Main Content Area with Side Navs */}
             <div className="flex flex-1">
-                {/* Left Navigation - Previous code unchanged */}
-                <nav className="w-64 bg-[#1A150F] p-4 space-y-4">
-                    {/* Previous nav content */}
-                    <div className="mb-8">
-                        <h2 className="text-[#D4C5B2] text-xl font-bold">Operations</h2>
-                    </div>
-
-                    <div className="space-y-2">
-                        {[
-                            { icon: Home, label: 'Headquarters' },
-                            { icon: Users, label: 'Family' },
-                            { icon: Briefcase, label: 'Business' },
-                            { icon: Map, label: 'Territory' },
-                            { icon: Shield, label: 'Defense' },
-                        ].map((item) => (
-                            <Button
-                                key={item.label}
-                                variant="ghost"
-                                className="w-full justify-start text-[#B8A99A] hover:text-[#D4C5B2] hover:bg-[#2A241D]"
-                            >
-                                <item.icon className="mr-2 h-4 w-4" />
-                                {item.label}
-                            </Button>
-                        ))}
-                    </div>
-                </nav>
+                {/* Left Navigation */}
+                <LeftNavigationBar />
 
                 {/* Main Content */}
                 <main className="flex-1 p-6 space-y-6">
-                    {/* Top Stats Grid - Previous code unchanged */}
+                    {/* Top Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {/* Previous stat boxes */}
                         <div className="bg-[#1A150F] p-6 rounded-lg">
