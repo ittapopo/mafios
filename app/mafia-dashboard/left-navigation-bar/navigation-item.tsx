@@ -1,18 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { LucideIcon } from "lucide-react";
+"use client";
 
-const NavigationItem = ({ item }: { item: { icon: LucideIcon; label: string } }) => {
-    const { icon: Icon, label } = item;
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
+export const NavigationItem = ({
+    item: { icon, label, route },
+}: {
+    item: { icon: JSX.Element; label: string; route: string };
+}) => {
+    const router = useRouter();
 
     return (
         <Button
+            onClick={() => router.push(route)}
             variant="ghost"
             className="w-full justify-start text-[#B8A99A] hover:text-[#D4C5B2] hover:bg-[#2A241D]"
         >
-            <Icon className="mr-2 h-4 w-4" />
+            <span className="mr-2 h-4 w-4">{icon}</span>
             {label}
         </Button>
     );
 };
-
-export { NavigationItem }
