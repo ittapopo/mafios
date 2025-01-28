@@ -1,6 +1,6 @@
 import React from 'react';
-import { MainContent } from './homepage-main-content/main-content';
-import { HomepageNavBar } from './homepage-nav-bar/homepage-nav-bar';
+import { MainContent } from './homepage/homepage-main-content/main-content';
+import { HomepageNavBar } from './homepage/homepage-nav-bar/homepage-nav-bar';
 
 const MafiaLanding = () => {
   return (
