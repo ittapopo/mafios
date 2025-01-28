@@ -1,14 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/router";
+import { useRouter } from 'next/navigation';
 
 const MainContentClient = () => {
     const router = useRouter();
 
     const handleClick = () => {
-        router.push('/');
-    }
+        router.push('/mafia-dashboard');
+    };
 
     return (
         <>
@@ -23,6 +23,7 @@ const MainContentClient = () => {
                 <div className="space-x-4">
                     <Button
                         className="bg-[#8B7355] hover:bg-[#6B563D] text-[#D4C5B2] text-lg px-8 py-6"
+                        onClick={handleClick}
                     >
                         Start Your Empire
                     </Button>
