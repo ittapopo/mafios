@@ -1,6 +1,4 @@
 
-type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic';
-
 const rarityColors: Record<Rarity, string> = {
     Common: 'bg-[#8B7355]/30 text-[#B8A99A]',
     Uncommon: 'bg-[#4A9F4A]/30 text-[#7FBF7F]',
