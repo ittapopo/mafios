@@ -7,7 +7,7 @@ const MainContentClient = () => {
     const router = useRouter();
 
     const handleClick = () => {
-        router.push('/mafia-dashboard');
+        router.push('/dashboard');
     };
 
     return (
