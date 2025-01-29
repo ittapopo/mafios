@@ -22,6 +22,8 @@ import {
 import { useRouter } from 'next/router';
 import TopBanner from './top-banner/top-banner';
 import { LeftNavigationBar } from './left-navigation-bar/left-navigation-bar';
+import { RightNavigationBar } from './right-navigation-bar/right-navigation-bar';
+import TopStatsGrid from './top-stats/stat-card';
 
 const MafiaDashboard = () => {
     //const router = useRouter();
@@ -40,7 +42,7 @@ const MafiaDashboard = () => {
 
     return (
         <div className="min-h-screen bg-[#2A241D] flex flex-col">
-            {/* Top Banne */}
+            {/* Top Banner */}
             <TopBanner />
 
             {/* Main Content Area with Side Navs */}
@@ -51,54 +53,7 @@ const MafiaDashboard = () => {
                 {/* Main Content */}
                 <main className="flex-1 p-6 space-y-6">
                     {/* Top Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Previous stat boxes */}
-                        <div className="bg-[#1A150F] p-6 rounded-lg">
-                            <h3 className="text-[#D4C5B2] text-xl mb-4">Character Stats</h3>
-                            <div className="space-y-3">
-                                <div className="flex justify-between text-[#B8A99A]">
-                                    <span>Respect</span>
-                                    <span>875/1000</span>
-                                </div>
-                                <div className="flex justify-between text-[#B8A99A]">
-                                    <span>Influence</span>
-                                    <span>234/500</span>
-                                </div>
-                                <div className="flex justify-between text-[#B8A99A]">
-                                    <span>Wealth</span>
-                                    <span>$1,245,000</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-[#1A150F] p-6 rounded-lg">
-                            <h3 className="text-[#D4C5B2] text-xl mb-4">Family Members</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center text-[#B8A99A]">
-                                    <Users className="mr-2 h-4 w-4" />
-                                    <span>12 Made Members</span>
-                                </div>
-                                <div className="flex items-center text-[#B8A99A]">
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    <span>4 Capos</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-[#1A150F] p-6 rounded-lg">
-                            <h3 className="text-[#D4C5B2] text-xl mb-4">Territory Control</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center text-[#B8A99A]">
-                                    <Map className="mr-2 h-4 w-4" />
-                                    <span>3 Districts Controlled</span>
-                                </div>
-                                <div className="flex items-center text-[#B8A99A]">
-                                    <Briefcase className="mr-2 h-4 w-4" />
-                                    <span>8 Businesses</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <TopStatsGrid />
 
                     {/* New Character Display and Status Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -180,40 +135,11 @@ const MafiaDashboard = () => {
                     </div>
                 </main>
 
-                {/* Right Navigation - Previous code unchanged */}
-                <nav className="w-64 bg-[#1A150F] p-4 space-y-4">
-                    <div className="mb-8">
-                        <h2 className="text-[#D4C5B2] text-xl font-bold">Social</h2>
-                    </div>
+                {/* Right Navigation */}
+                <RightNavigationBar />
 
-                    <div className="space-y-2">
-                        {[
-                            { icon: MessageSquare, label: 'Messages', count: 3 },
-                            { icon: Bell, label: 'Notifications', count: 5 },
-                            { icon: Mail, label: 'Invites', count: 2 },
-                            { icon: UserPlus, label: 'Recruitment' },
-                            { icon: Gift, label: 'Rewards' },
-                        ].map((item) => (
-                            <Button
-                                key={item.label}
-                                variant="ghost"
-                                className="w-full justify-between text-[#B8A99A] hover:text-[#D4C5B2] hover:bg-[#2A241D]"
-                            >
-                                <span className="flex items-center">
-                                    <item.icon className="mr-2 h-4 w-4" />
-                                    {item.label}
-                                </span>
-                                {item.count && (
-                                    <span className="bg-[#8B7355] px-2 py-1 rounded-full text-xs">
-                                        {item.count}
-                                    </span>
-                                )}
-                            </Button>
-                        ))}
-                    </div>
-                </nav>
             </div>
-        </div >
+        </div>
     );
 };
 

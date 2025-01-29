@@ -1,5 +1,5 @@
 import { Home, User, Users, Briefcase, Map, Shield } from "lucide-react";
-import { NavigationItem } from "./navigation-item";
+import { NavigationItem } from "../../../components/navigation/navigation-item";
 
 const navigationItems = [
     { icon: <User />, label: "Character", route: "/character" },
