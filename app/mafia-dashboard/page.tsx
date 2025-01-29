@@ -7,8 +7,7 @@ import { RightNavigationBar } from './right-navigation-bar/right-navigation-bar'
 import TopStatsGrid from './top-stats/stat-card';
 import { CharacterContent } from './character-content/character-content';
 import { HeadquartersContent } from './headquarters-content/headquarters-content';
-
-type Route = '/character' | '/headquarters' | '/family' | '/business' | '/territory' | '/defense';
+import { Route } from '../lib/types';
 
 const MafiaDashboard: React.FC = () => {
     const [currentRoute, setCurrentRoute] = useState<Route>('/character');

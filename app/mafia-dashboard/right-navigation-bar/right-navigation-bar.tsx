@@ -1,8 +1,9 @@
 import { Bell, Gift, Mail, MessageSquare, UserPlus } from "lucide-react";
 import { NavigationItem } from "../../../components/navigation/navigation-item";
+import { NavItem } from "@/app/lib/types";
 
 
-const navigationItems = [
+const navigationItems: NavItem[] = [
     { icon: <MessageSquare />, label: 'Messages', route: 'messages', count: 3 },
     { icon: <Bell />, label: 'Notifications', route: 'notifications', count: 5 },
     { icon: <Mail />, label: 'Invites', route: 'invites', count: 2 },

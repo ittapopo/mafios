@@ -1,8 +1,8 @@
-import { ReactElement, ReactNode } from "react";
+import { ReactElement } from "react";
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic';
 
-export interface EquipmentItem {
+export interface EquipmentItemType {
     slot: string;
     label: string;
     stats: string;
@@ -30,7 +30,8 @@ export interface NavigationItem {
     count?: number;
 }
 
-export type Route = '/character' | '/headquarters' | '/family' | '/business' | '/territory' | '/defense';
+export type Route = '/character' | '/headquarters' | '/family' | '/business' | '/territory'
+    | '/defense' | 'messages' | 'notifications' | 'invites' | 'recruitment' | 'rewards';
 
 export interface LeftNavigationBarProps {
     onRouteChange: (route: Route) => void;
@@ -41,11 +42,12 @@ export interface NavigationItemProps {
     item: { icon: React.ReactNode; label: string; route: Route; count?: number };
     justifyBetween?: boolean;
     isActive?: boolean;
-    onRouteChange: (route: Route) => void;
+    onRouteChange?: (route: Route) => void;
 }
 
 export interface NavItem {
-    icon: ReactNode;
+    icon: React.ReactNode;
     label: string;
-    route: string;
+    route: Route;
+    count?: number;
 }

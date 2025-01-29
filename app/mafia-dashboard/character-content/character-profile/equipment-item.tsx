@@ -1,3 +1,4 @@
+import { Rarity } from "@/app/lib/types";
 
 const rarityColors: Record<Rarity, string> = {
     Common: 'bg-[#8B7355]/30 text-[#B8A99A]',

@@ -1,8 +1,9 @@
 import { Upload } from "lucide-react";
 import { EquipmentItem } from "./equipment-item";
+import { EquipmentItemType } from "@/app/lib/types";
 
 export const CharacterProfile = () => {
-    const equipment: EquipmentItem[] = [
+    const equipment: EquipmentItemType[] = [
         { slot: 'Weapon', label: 'Custom M1911', stats: '+3 Power • +2 Accuracy', rarity: 'Rare' },
         { slot: 'Armor', label: 'Bulletproof Vest', stats: '+3 Defense • -1 Agility', rarity: 'Uncommon' },
         { slot: 'Accessory', label: 'Lucky Ring', stats: '+1 All Stats', rarity: 'Epic' },

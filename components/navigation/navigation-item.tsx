@@ -11,7 +11,11 @@ export const NavigationItem: React.FC<NavigationItemProps> = ({
 }) => {
     return (
         <Button
-            onClick={() => onRouteChange(route as Route)}
+            onClick={() => {
+                if (onRouteChange) {
+                    onRouteChange(route as Route);
+                }
+            }}
             variant="ghost"
             className={`w-full flex items-center ${justifyBetween ? "justify-between" : "justify-start"
                 } ${isActive
