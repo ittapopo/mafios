@@ -1,3 +1,4 @@
+import { SecurityLevel } from "@/app/lib/types";
 import { Shield } from "lucide-react";
 
 export const SecurityStatus = () => {

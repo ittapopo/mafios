@@ -1,3 +1,4 @@
+import { Operation } from "@/app/lib/types";
 import { DollarSign, Shield, Target, Radio } from "lucide-react";
 
 export const OperationsCenter = () => {
