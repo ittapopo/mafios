@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Users, Shield, Map, Briefcase } from 'lucide-react';
 
-const StatCard = ({ title, children }) => (
+interface StatCardProps {
+    title: string;
+    children: ReactNode;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, children }) => (
     <div className="bg-[#1A150F] p-6 rounded-lg">
         <h3 className="text-[#D4C5B2] text-xl mb-4">{title}</h3>
         <div className="space-y-3">

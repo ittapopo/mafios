@@ -18,6 +18,7 @@ export const NavigationItem = ({
             variant="ghost"
             className={`w-full flex items-center ${justifyBetween ? "justify-between" : "justify-start"
                 } text-[#B8A99A] hover:text-[#D4C5B2] hover:bg-[#2A241D]`}
+
         >
             {/* Container for Icon and Label */}
             <div className="flex items-center">
