@@ -9,6 +9,7 @@ import { CharacterContent } from './character-content/character-content';
 import { HeadquartersContent } from './headquarters-content/headquarters-content';
 import { Route } from '../lib/types';
 import FamilyContent from './family-content/family-content';
+import { BusinessContent } from './business-content/business-content';
 
 const MafiaDashboard: React.FC = () => {
     const [currentRoute, setCurrentRoute] = useState<Route>('/character');
@@ -21,6 +22,8 @@ const MafiaDashboard: React.FC = () => {
                 return <HeadquartersContent />;
             case '/family':
                 return <FamilyContent />;
+            case '/business':
+                return <BusinessContent />;
             // Add other cases for Family, Business, Territory, Defense
             default:
                 return <CharacterContent />;
