@@ -8,6 +8,7 @@ import TopStatsGrid from './top-stats/stat-card';
 import { CharacterContent } from './character-content/character-content';
 import { HeadquartersContent } from './headquarters-content/headquarters-content';
 import { Route } from '../lib/types';
+import FamilyContent from './family-content/family-content';
 
 const MafiaDashboard: React.FC = () => {
     const [currentRoute, setCurrentRoute] = useState<Route>('/character');
@@ -18,6 +19,8 @@ const MafiaDashboard: React.FC = () => {
                 return <CharacterContent />;
             case '/headquarters':
                 return <HeadquartersContent />;
+            case '/family':
+                return <FamilyContent />;
             // Add other cases for Family, Business, Territory, Defense
             default:
                 return <CharacterContent />;
