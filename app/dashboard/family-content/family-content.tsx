@@ -1,11 +1,10 @@
-import { FamilyStatus } from "./family-status/family-status";
-import { MemberProfile } from "./member-profile/member-profile";
+import { FamilyDynasty } from "./family-dynasty/family-dynasty";
+import { FamilyMembers } from "./family-members/family-members";
 
-const FamilyContent = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FamilyStatus />
-        <MemberProfile />
+export const FamilyContent = () => (
+    <div className="max-w-4xl mx-auto space-y-4">
+        <FamilyDynasty />
+        <FamilyMembers />
     </div>
 );
-
 export default FamilyContent;
