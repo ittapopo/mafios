@@ -1,23 +1,15 @@
 import { Clock, DollarSign, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { useTimer } from "@/app/lib/hooks";
 
 export const CrimeItem = ({ crime }: { crime: { name: string; duration: number; reward: number; risk: string } }) => {
-    const [isRunning, setIsRunning] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0);
+    const { timeLeft, isRunning, start } = useTimer({
+        onComplete: () => {
+            console.log(`Crime "${crime.name}" completed! Reward: $${crime.reward}`);
+        },
+    });
 
     const startCrime = () => {
-        setIsRunning(true);
-        setTimeLeft(crime.duration);
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    setIsRunning(false);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
+        start(crime.duration);
     };
 
     return (
