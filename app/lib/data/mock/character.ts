@@ -1,5 +1,5 @@
 /**
- * Mock character data
+ * Mock character data - Scandinavian organized crime theme
  */
 
 import { EquipmentItemType, MaterialStatus } from '../../types';
@@ -7,42 +7,42 @@ import { EquipmentItemType, MaterialStatus } from '../../types';
 export const mockEquipment: EquipmentItemType[] = [
     {
         slot: 'Weapon',
-        label: 'Thompson Submachine Gun',
+        label: 'CZ Scorpion EVO',
         stats: '+15 Combat, +5 Intimidation',
         rarity: 'Epic',
     },
     {
         slot: 'Armor',
-        label: 'Reinforced Suit',
-        stats: '+10 Defense, +3 Charisma',
+        label: 'Leather MC Vest',
+        stats: '+10 Defense, +3 Respect',
         rarity: 'Rare',
     },
     {
         slot: 'Accessory',
-        label: 'Gold Pocket Watch',
-        stats: '+8 Charisma, +2 Luck',
+        label: 'Encrypted Phone',
+        stats: '+8 Stealth, +2 Intelligence',
         rarity: 'Uncommon',
     },
     {
         slot: 'Vehicle',
-        label: 'Armored Sedan',
-        stats: '+12 Speed, +7 Defense',
+        label: 'Harley-Davidson Fat Boy',
+        stats: '+12 Speed, +7 Intimidation',
         rarity: 'Rare',
     },
 ];
 
 export const mockMaterials: MaterialStatus[] = [
-    { name: 'Cash', current: 45000, max: 100000 },
-    { name: 'Influence', current: 320, max: 500 },
-    { name: 'Respect', current: 78, max: 100 },
-    { name: 'Heat', current: 42, max: 100 },
+    { name: 'Kontanter', current: 450000, max: 1000000 }, // Cash (Swedish: Kontanter)
+    { name: 'Inflytande', current: 320, max: 500 },        // Influence (Swedish: Inflytande)
+    { name: 'Respekt', current: 78, max: 100 },            // Respect (Swedish: Respekt)
+    { name: 'Polisbevakning', current: 42, max: 100 },     // Police Heat (Swedish: Polisbevakning)
 ];
 
 export const mockCharacterStats = {
-    name: 'Don Vittorio',
+    name: 'Lars "Lasse" Nordström',
     level: 25,
-    family: 'Corleone',
-    rank: 'Capo',
+    chapter: 'Stockholm MC',
+    rank: 'Enforcer',  // Biker gang rank instead of mafia
     health: 100,
     energy: 85,
 };
