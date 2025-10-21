@@ -12,33 +12,66 @@ const config: Config = {
         '13': 'repeat(13, minmax(0, 1fr))',
       },
       colors: {
-        // Mafia theme color palette
-        mafia: {
+        // Nordic noir theme - Scandinavian organized crime aesthetic
+        nordic: {
           bg: {
-            DEFAULT: '#2A241D',
-            dark: '#1A150F',
-            darker: '#0F0B08',
+            DEFAULT: '#0A0E14', // Dark Nordic night
+            dark: '#050810',    // Deepest black-blue
+            darker: '#020408',  // Almost black
+            light: '#141B26',   // Slightly lighter background
           },
           text: {
-            primary: '#D4C5B2',
-            secondary: '#B8A99A',
-            muted: '#8B7355',
+            primary: '#E8EDF4',   // Ice white
+            secondary: '#B8C5D6', // Frost gray
+            muted: '#7B8FA3',     // Muted blue-gray
+            accent: '#88C0D0',    // Nordic blue accent
           },
           accent: {
-            DEFAULT: '#8B7355',
-            light: '#B8A99A',
-            dark: '#6B5943',
+            DEFAULT: '#5E81AC',   // Steel blue
+            light: '#81A1C1',     // Light steel
+            dark: '#4C688A',      // Deep steel
+            cold: '#88C0D0',      // Ice blue
+            snow: '#ECEFF4',      // Snow white
           },
           border: {
-            DEFAULT: '#8B7355',
-            light: 'rgba(139, 115, 85, 0.3)',
-            dark: 'rgba(139, 115, 85, 0.5)',
+            DEFAULT: '#2E3440',   // Dark gray border
+            light: 'rgba(136, 192, 208, 0.2)', // Subtle ice blue
+            dark: 'rgba(46, 52, 64, 0.8)',     // Dark gray
           },
           status: {
-            success: '#4CAF50',
-            warning: '#FFC107',
-            danger: '#F44336',
-            info: '#2196F3',
+            success: '#A3BE8C',   // Nordic green
+            warning: '#EBCB8B',   // Nordic yellow
+            danger: '#BF616A',    // Nordic red
+            info: '#88C0D0',      // Nordic blue
+          },
+        },
+        // Legacy mafia colors for backward compatibility
+        mafia: {
+          bg: {
+            DEFAULT: '#0A0E14',
+            dark: '#050810',
+            darker: '#020408',
+          },
+          text: {
+            primary: '#E8EDF4',
+            secondary: '#B8C5D6',
+            muted: '#7B8FA3',
+          },
+          accent: {
+            DEFAULT: '#5E81AC',
+            light: '#81A1C1',
+            dark: '#4C688A',
+          },
+          border: {
+            DEFAULT: '#2E3440',
+            light: 'rgba(136, 192, 208, 0.2)',
+            dark: 'rgba(46, 52, 64, 0.8)',
+          },
+          status: {
+            success: '#A3BE8C',
+            warning: '#EBCB8B',
+            danger: '#BF616A',
+            info: '#88C0D0',
           },
         },
       },

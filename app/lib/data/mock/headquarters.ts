@@ -1,63 +1,63 @@
 /**
- * Mock headquarters data
+ * Mock headquarters data - MC Clubhouse security and operations
  */
 
 import { SecurityLevel, Operation } from '../../types';
 
 export const mockSecurityLevels: SecurityLevel[] = [
     {
-        area: 'Main Entrance',
+        area: 'Clubhouse Entrance',
         level: 4,
         status: 'Secured',
-        description: 'Armed guards and metal detectors',
+        description: 'Reinforced door, camera surveillance',
     },
     {
-        area: 'Vault',
+        area: 'Weapons Cache',
         level: 5,
         status: 'Maximum Security',
-        description: 'Reinforced steel, biometric locks',
+        description: 'Hidden compartment, encrypted access',
     },
     {
-        area: 'Back Alley',
+        area: 'Back Lot',
         level: 2,
         status: 'Compromised',
-        description: 'Needs immediate attention',
+        description: 'Potential police surveillance point',
     },
     {
-        area: 'Office Floor',
+        area: 'Meeting Room',
         level: 3,
         status: 'Secured',
-        description: 'CCTV and security patrols',
+        description: 'Signal jammers, soundproofing',
     },
 ];
 
 export const mockOperations: Operation[] = [
     {
-        name: 'Protection Racket',
+        name: 'Drug Distribution Network',
         type: 'Income',
         status: 'Active',
         efficiency: 87,
     },
     {
-        name: 'Weapons Smuggling',
+        name: 'Estonian Import Route',
         type: 'Income',
         status: 'Active',
         efficiency: 92,
     },
     {
-        name: 'Perimeter Defense',
+        name: 'Clubhouse Security',
         type: 'Defense',
         status: 'Active',
         efficiency: 78,
     },
     {
-        name: 'Territory Raid',
+        name: 'Rival Chapter Conflict',
         type: 'Offense',
         status: 'Cooldown',
         efficiency: 0,
     },
     {
-        name: 'Information Network',
+        name: 'Police Informant Network',
         type: 'Defense',
         status: 'Ready',
         efficiency: 100,

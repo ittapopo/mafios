@@ -1,69 +1,70 @@
 /**
- * Mock territory data
+ * Mock territory data - Scandinavian cities and districts
+ * Based on real Nordic urban areas where organized crime is present
  */
 
 import { Territory, TerritoryStats } from '../../types';
 
 export const mockTerritories: Territory[] = [
     {
-        id: 'downtown-1',
-        name: 'Little Italy',
-        district: 'Downtown',
+        id: 'stockholm-sodermalm',
+        name: 'Södermalm',
+        district: 'Stockholm',
         status: 'Controlled',
         control: 95,
-        income: 5000,
+        income: 45000,
         defenseLevel: 4,
-        description: 'Historic neighborhood with strong family presence',
+        description: 'Historic district with MC clubhouse presence',
     },
     {
-        id: 'downtown-2',
-        name: 'Harbor District',
-        district: 'Downtown',
+        id: 'stockholm-frihamnen',
+        name: 'Frihamnen Port',
+        district: 'Stockholm',
         status: 'Controlled',
         control: 88,
-        income: 7500,
+        income: 75000,
         defenseLevel: 5,
-        description: 'Strategic port access for smuggling operations',
+        description: 'Strategic port access for Baltic smuggling routes',
     },
     {
-        id: 'westside-1',
-        name: 'Casino Row',
-        district: 'Westside',
+        id: 'malmo-rosengard',
+        name: 'Rosengård',
+        district: 'Malmö',
         status: 'Contested',
         control: 65,
-        income: 3000,
+        income: 30000,
         defenseLevel: 3,
-        description: 'Gambling district under dispute',
+        description: 'High-crime area, disputed with local gangs',
     },
     {
-        id: 'westside-2',
-        name: 'Industrial Zone',
-        district: 'Westside',
+        id: 'copenhagen-vesterbro',
+        name: 'Vesterbro',
+        district: 'Copenhagen',
         status: 'Controlled',
         control: 78,
-        income: 4500,
+        income: 55000,
         defenseLevel: 3,
-        description: 'Warehouses and manufacturing facilities',
+        description: 'Red light district with protection rackets',
     },
     {
-        id: 'eastside-1',
-        name: 'Financial District',
-        district: 'Eastside',
+        id: 'oslo-grunerlokka',
+        name: 'Grünerløkka',
+        district: 'Oslo',
         status: 'Enemy',
         control: 20,
         income: 0,
         defenseLevel: 1,
-        description: 'Rival family stronghold',
+        description: 'Rival MC chapter stronghold',
     },
     {
-        id: 'northside-1',
-        name: 'Residential Quarter',
-        district: 'Northside',
+        id: 'gothenburg-hisingen',
+        name: 'Hisingen',
+        district: 'Gothenburg',
         status: 'Neutral',
         control: 0,
         income: 0,
         defenseLevel: 0,
-        description: 'Unclaimed territory',
+        description: 'Industrial area, expansion opportunity',
     },
 ];
 
@@ -71,5 +72,5 @@ export const mockTerritoryStats: TerritoryStats = {
     totalTerritories: 12,
     controlledTerritories: 8,
     contestedTerritories: 2,
-    totalIncome: 45000,
+    totalIncome: 450000, // SEK (Swedish Kronor)
 };

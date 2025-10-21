@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a mafia-themed game dashboard application built with Next.js 15 (canary), React 19 (RC), and TypeScript. The project features a single-page application with client-side routing that simulates a mafia organization management interface.
+This is a **Nordic organized crime-themed** dashboard application built with Next.js 15 (canary), React 19 (RC), and TypeScript. The project features a single-page application with client-side routing that simulates a **Scandinavian MC (motorcycle club) organization** inspired by Nordic noir aesthetics and real-world Nordic criminal organizations.
+
+**Theme:** Scandinavian organized crime (biker gangs, drug trafficking, Baltic smuggling routes)
+**Aesthetic:** Nordic noir (cold, minimalist, dark blue-gray palette)
+**Setting:** Stockholm, Copenhagen, Oslo, Malmö, Gothenburg
+
+See `NORDIC_THEME.md` for complete theme documentation.
 
 ## Commands
 
