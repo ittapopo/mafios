@@ -7,3 +7,4 @@ export * from './headquarters';
 export * from './business';
 export * from './family';
 export * from './territory';
+export * from './state';

@@ -3,3 +3,4 @@
  */
 
 export { RouteProvider, useRoute } from './RouteContext';
+export { GameProvider, useGameState } from './GameContext';
