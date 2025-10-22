@@ -11,7 +11,7 @@ import { HeadquartersContent } from './headquarters-content/headquarters-content
 import FamilyContent from './family-content/family-content';
 import { BusinessContent } from './business-content/business-content';
 import { TerritoryContent } from './territory-content/territory-content';
-import { RouteProvider, useRoute } from '../lib/contexts';
+import { RouteProvider, useRoute, GameProvider } from '../lib/contexts';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
 /**
@@ -106,14 +106,16 @@ const DashboardContent: React.FC = () => {
 
 /**
  * Main Dashboard Component
- * Provides routing context and error boundary to the entire dashboard
+ * Provides game state, routing context, and error boundary to the entire dashboard
  */
 const MafiaDashboard: React.FC = () => {
     return (
         <ErrorBoundary>
-            <RouteProvider initialRoute="/character">
-                <DashboardContent />
-            </RouteProvider>
+            <GameProvider>
+                <RouteProvider initialRoute="/character">
+                    <DashboardContent />
+                </RouteProvider>
+            </GameProvider>
         </ErrorBoundary>
     );
 };
