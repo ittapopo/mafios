@@ -11,6 +11,7 @@ import { HeadquartersContent } from './headquarters-content/headquarters-content
 import FamilyContent from './family-content/family-content';
 import { BusinessContent } from './business-content/business-content';
 import { TerritoryContent } from './territory-content/territory-content';
+import { DefenseContent } from './defense-content/defense-content';
 import { RouteProvider, useRoute, GameProvider } from '../lib/contexts';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
@@ -36,12 +37,7 @@ const DashboardContent: React.FC = () => {
             case '/territory':
                 return <TerritoryContent />;
             case '/defense':
-                return (
-                    <div className="bg-nordic-bg-dark p-6 rounded-lg border-2 border-nordic-border-light">
-                        <h2 className="text-nordic-text-primary text-2xl mb-4">Defense</h2>
-                        <p className="text-nordic-text-secondary">Defense systems coming soon...</p>
-                    </div>
-                );
+                return <DefenseContent />;
             default:
                 return <CharacterContent />;
         }

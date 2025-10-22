@@ -96,6 +96,30 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         return () => clearInterval(saveInterval);
     }, []);
 
+    // Passive income from territories every 60 seconds
+    useEffect(() => {
+        const incomeInterval = setInterval(() => {
+            setState((prev) => {
+                const territoryIncome = prev.territoryStats.totalIncome;
+
+                // Only award income if we have controlled territories
+                if (territoryIncome > 0) {
+                    return {
+                        ...prev,
+                        player: {
+                            ...prev.player,
+                            kontanter: prev.player.kontanter + territoryIncome,
+                        },
+                    };
+                }
+
+                return prev;
+            });
+        }, 60000); // Every 60 seconds
+
+        return () => clearInterval(incomeInterval);
+    }, []);
+
     // ===== Resource Management =====
 
     const addKontanter = useCallback((amount: number) => {
