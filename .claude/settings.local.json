@@ -5,7 +5,11 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(gh pr create:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(pnpm run dev)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(exit 0)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

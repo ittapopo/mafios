@@ -11,6 +11,11 @@ import { GameState, GameActions, DEFAULT_GAME_STATE, PlayerStats } from '../type
 import { EquipmentItemType } from '../types';
 import { FamilyMember } from '../types/game/family';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { CharacterService } from '../data/services/character.service';
+import { BusinessService } from '../data/services/business.service';
+import { mockFamilyMembers, mockFamilyStats } from '../data/mock/family';
+import { mockSecurityLevels, mockOperations } from '../data/mock/headquarters';
+import { mockTerritories, mockTerritoryStats } from '../data/mock/territory';
 
 const STORAGE_KEY = 'mafios-game-state';
 
@@ -26,17 +31,42 @@ interface GameProviderProps {
 }
 
 /**
+ * Initialize game state with mock data from services
+ */
+const initializeGameState = (): GameState => {
+    return {
+        ...DEFAULT_GAME_STATE,
+        equipment: CharacterService.getEquipment(),
+        chapter: {
+            name: 'Stockholm MC',
+            members: mockFamilyMembers,
+            stats: mockFamilyStats,
+            reputation: 0,
+        },
+        operations: mockOperations,
+        territories: mockTerritories,
+        territoryStats: mockTerritoryStats,
+    };
+};
+
+/**
  * Game Provider Component
  *
  * Manages global game state with localStorage persistence
  */
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
-    const [state, setState] = useLocalStorage<GameState>(STORAGE_KEY, DEFAULT_GAME_STATE);
+    // Try to load from localStorage, otherwise initialize with mock data
+    const [state, setState] = useLocalStorage<GameState>(STORAGE_KEY, initializeGameState());
     const [isLoading, setIsLoading] = useState(true);
     const [playTimeInterval, setPlayTimeInterval] = useState<NodeJS.Timeout | null>(null);
 
     // Initialize game and start play time tracker
     useEffect(() => {
+        // Check if this is first load (no equipment means fresh start)
+        if (state.equipment.length === 0 && state.chapter.members.length === 0) {
+            setState(initializeGameState());
+        }
+
         setIsLoading(false);
 
         // Track play time

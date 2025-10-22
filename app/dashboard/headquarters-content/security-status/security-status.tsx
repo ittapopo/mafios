@@ -1,53 +1,60 @@
+"use client";
+
 import { SecurityLevel } from "@/app/lib/types";
 import { Shield } from "lucide-react";
+import { useGameState } from "@/app/lib/hooks";
 
 export const SecurityStatus = () => {
-    const securityLevels: SecurityLevel[] = [
+    const { state } = useGameState();
+
+    // Get security levels from game state or use defaults
+    const securityLevels: SecurityLevel[] = state.securityLevels || [
         {
-            area: 'Perimeter',
+            area: 'Clubhouse Perimeter',
             level: 3,
             status: 'Secured',
-            description: 'Armed guards, surveillance, electric fence'
+            description: 'Armed members, security cameras, reinforced entry'
         },
         {
-            area: 'Internal',
+            area: 'Safe House',
             level: 4,
             status: 'Maximum Security',
-            description: 'Biometric access, panic rooms, escape tunnels'
+            description: 'Hidden location, biometric locks, escape routes'
         },
         {
-            area: 'Digital',
+            area: 'Communications',
             level: 2,
             status: 'Compromised',
-            description: 'Firewall breach detected, countermeasures active'
+            description: 'Encrypted phones, potential police surveillance detected'
         }
     ];
 
     return (
-        <div className="bg-[#1A150F] p-6 rounded-lg">
+        <div className="bg-nordic-bg-dark p-6 rounded-lg">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[#D4C5B2] text-xl">Security Status</h3>
-                <Shield className="text-[#D4C5B2] h-6 w-6" />
+                <h3 className="text-nordic-text-primary text-xl">Security Status</h3>
+                <Shield className="text-nordic-text-primary h-6 w-6" />
             </div>
             <div className="space-y-4">
                 {securityLevels.map((security) => (
-                    <div key={security.area} className="border-b border-[#2A241D] pb-3">
+                    <div key={security.area} className="border-b border-nordic-border pb-3">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-[#B8A99A]">{security.area}</span>
-                            <span className={`px-2 py-1 rounded text-sm ${security.status === 'Compromised' ? 'bg-red-900 text-red-200' :
-                                security.status === 'Secured' ? 'bg-green-900 text-green-200' :
-                                    'bg-blue-900 text-blue-200'
+                            <span className="text-nordic-text-secondary">{security.area}</span>
+                            <span className={`px-2 py-1 rounded text-sm ${
+                                security.status === 'Compromised' ? 'bg-nordic-status-danger text-white' :
+                                security.status === 'Secured' ? 'bg-nordic-status-success text-white' :
+                                'bg-nordic-accent text-white'
                                 }`}>
                                 {security.status}
                             </span>
                         </div>
-                        <div className="w-full bg-[#2A241D] h-2 rounded-full">
+                        <div className="w-full bg-nordic-bg h-2 rounded-full">
                             <div
-                                className="bg-[#D4C5B2] h-2 rounded-full"
+                                className="bg-nordic-accent h-2 rounded-full"
                                 style={{ width: `${(security.level / 5) * 100}%` }}
                             />
                         </div>
-                        <p className="text-[#8B7355] text-sm mt-2">{security.description}</p>
+                        <p className="text-nordic-text-muted text-sm mt-2">{security.description}</p>
                     </div>
                 ))}
             </div>
