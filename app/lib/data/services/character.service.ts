@@ -5,7 +5,7 @@
  * Currently returns mock data, but can be easily replaced with API calls.
  */
 
-import { mockEquipment, mockMaterials, mockCharacterStats } from '../mock/character';
+import { mockEquipment, mockMaterials, mockCharacterStats, mockShopInventory } from '../mock/character';
 import { EquipmentItemType, MaterialStatus } from '../../types';
 
 export class CharacterService {
@@ -14,6 +14,13 @@ export class CharacterService {
      */
     static getEquipment(): EquipmentItemType[] {
         return mockEquipment;
+    }
+
+    /**
+     * Get shop inventory
+     */
+    static getShopInventory(): EquipmentItemType[] {
+        return mockShopInventory;
     }
 
     /**

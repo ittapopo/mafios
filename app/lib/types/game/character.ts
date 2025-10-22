@@ -3,12 +3,16 @@
  */
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic';
+export type EquipmentSlot = 'Weapon' | 'Armor' | 'Accessory' | 'Vehicle';
 
 export interface EquipmentItemType {
-    slot: string;
+    id: string;
+    slot: EquipmentSlot;
     label: string;
     stats: string;
     rarity: Rarity;
+    price: number;
+    equipped?: boolean;
 }
 
 export interface MaterialStatus {
