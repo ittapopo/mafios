@@ -95,8 +95,11 @@ export interface GameActions {
     updateTerritoryControl: (territoryId: string, control: number) => void;
 
     // Operations
-    startOperation: (operationId: string) => void;
+    startOperation: (operationId: string) => boolean;
     stopOperation: (operationId: string) => void;
+    upgradeOperation: (operationId: string) => boolean;
+    assignMemberToOperation: (operationId: string, memberId: string) => void;
+    removeMemberFromOperation: (operationId: string, memberId: string) => void;
 
     // Family
     addMember: (member: FamilyMember) => void;
