@@ -96,19 +96,35 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         return () => clearInterval(saveInterval);
     }, []);
 
-    // Passive income from territories every 60 seconds
+    // Passive income from territories and operations every 60 seconds
     useEffect(() => {
         const incomeInterval = setInterval(() => {
             setState((prev) => {
                 const territoryIncome = prev.territoryStats.totalIncome;
 
-                // Only award income if we have controlled territories
-                if (territoryIncome > 0) {
+                // Calculate income and heat reduction from active operations
+                const activeOps = prev.operations.filter(op =>
+                    prev.activeOperations.includes(op.id)
+                );
+
+                const operationIncome = activeOps.reduce((sum, op) => {
+                    return sum + (op.incomePerTick || 0);
+                }, 0);
+
+                const heatReduction = activeOps.reduce((sum, op) => {
+                    return sum + (op.heatReductionPerTick || 0);
+                }, 0);
+
+                const totalIncome = territoryIncome + operationIncome;
+
+                // Only update if there's income or heat reduction
+                if (totalIncome > 0 || heatReduction > 0) {
                     return {
                         ...prev,
                         player: {
                             ...prev.player,
-                            kontanter: prev.player.kontanter + territoryIncome,
+                            kontanter: prev.player.kontanter + totalIncome,
+                            polisbevakning: Math.max(0, prev.player.polisbevakning - heatReduction),
                         },
                     };
                 }
@@ -381,16 +397,33 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
     // ===== Operations Management =====
 
-    const startOperation = useCallback((operationId: string) => {
-        setState((prev) => ({
-            ...prev,
-            activeOperations: [...prev.activeOperations, operationId],
-            operations: prev.operations.map(op =>
-                op.name === operationId
-                    ? { ...op, status: 'Active' as const }
-                    : op
-            ),
-        }));
+    const startOperation = useCallback((operationId: string): boolean => {
+        let success = false;
+        setState((prev) => {
+            const operation = prev.operations.find(op => op.id === operationId);
+            if (!operation || operation.status === 'Active') return prev;
+
+            // Check if player has enough money
+            if (prev.player.kontanter < operation.activationCost) {
+                return prev;
+            }
+
+            success = true;
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    kontanter: prev.player.kontanter - operation.activationCost,
+                },
+                activeOperations: [...prev.activeOperations, operationId],
+                operations: prev.operations.map(op =>
+                    op.id === operationId
+                        ? { ...op, status: 'Active' as const }
+                        : op
+                ),
+            };
+        });
+        return success;
     }, [setState]);
 
     const stopOperation = useCallback((operationId: string) => {
@@ -398,8 +431,82 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
             ...prev,
             activeOperations: prev.activeOperations.filter(id => id !== operationId),
             operations: prev.operations.map(op =>
-                op.name === operationId
+                op.id === operationId
                     ? { ...op, status: 'Ready' as const }
+                    : op
+            ),
+        }));
+    }, [setState]);
+
+    const upgradeOperation = useCallback((operationId: string): boolean => {
+        let success = false;
+        setState((prev) => {
+            const operation = prev.operations.find(op => op.id === operationId);
+            if (!operation || operation.level >= operation.maxLevel) return prev;
+
+            const upgradeCost = operation.upgradeCost * operation.level;
+
+            // Check if player has enough money
+            if (prev.player.kontanter < upgradeCost) {
+                return prev;
+            }
+
+            success = true;
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    kontanter: prev.player.kontanter - upgradeCost,
+                },
+                operations: prev.operations.map(op =>
+                    op.id === operationId
+                        ? {
+                            ...op,
+                            level: op.level + 1,
+                            efficiency: Math.min(100, op.efficiency + 5),
+                            incomePerTick: op.incomePerTick ? Math.floor(op.incomePerTick * 1.25) : undefined,
+                            heatReductionPerTick: op.heatReductionPerTick ? op.heatReductionPerTick + 1 : undefined,
+                        }
+                        : op
+                ),
+            };
+        });
+        return success;
+    }, [setState]);
+
+    const assignMemberToOperation = useCallback((operationId: string, memberId: string) => {
+        setState((prev) => {
+            const operation = prev.operations.find(op => op.id === operationId);
+            if (!operation) return prev;
+
+            const assignedCount = operation.assignedMemberIds?.length || 0;
+            if (assignedCount >= operation.maxMembers) return prev;
+
+            return {
+                ...prev,
+                operations: prev.operations.map(op =>
+                    op.id === operationId
+                        ? {
+                            ...op,
+                            assignedMemberIds: [...(op.assignedMemberIds || []), memberId],
+                            efficiency: Math.min(100, op.efficiency + 3),
+                        }
+                        : op
+                ),
+            };
+        });
+    }, [setState]);
+
+    const removeMemberFromOperation = useCallback((operationId: string, memberId: string) => {
+        setState((prev) => ({
+            ...prev,
+            operations: prev.operations.map(op =>
+                op.id === operationId
+                    ? {
+                        ...op,
+                        assignedMemberIds: (op.assignedMemberIds || []).filter(id => id !== memberId),
+                        efficiency: Math.max(0, op.efficiency - 3),
+                    }
                     : op
             ),
         }));
@@ -490,6 +597,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         updateTerritoryControl,
         startOperation,
         stopOperation,
+        upgradeOperation,
+        assignMemberToOperation,
+        removeMemberFromOperation,
         addMember,
         removeMember,
         updateMemberLoyalty,
