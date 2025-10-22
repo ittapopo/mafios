@@ -8,7 +8,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { GameState, GameActions, DEFAULT_GAME_STATE, PlayerStats } from '../types/game/state';
-import { EquipmentItemType } from '../types';
+import { EquipmentItemType, EquipmentSlot } from '../types';
 import { FamilyMember } from '../types/game/family';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { CharacterService } from '../data/services/character.service';
@@ -230,6 +230,88 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         }));
     }, [setState]);
 
+    const buyEquipment = useCallback((item: EquipmentItemType): boolean => {
+        let success = false;
+        setState((prev) => {
+            // Check if player has enough money
+            if (prev.player.kontanter < item.price) {
+                return prev;
+            }
+
+            success = true;
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    kontanter: prev.player.kontanter - item.price,
+                },
+                inventory: [...prev.inventory, { ...item, equipped: false }],
+            };
+        });
+        return success;
+    }, [setState]);
+
+    const sellEquipment = useCallback((itemId: string) => {
+        setState((prev) => {
+            // Find item in inventory
+            const item = prev.inventory.find(i => i.id === itemId);
+            if (!item) return prev;
+
+            // Sell for 60% of purchase price
+            const sellPrice = Math.floor(item.price * 0.6);
+
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    kontanter: prev.player.kontanter + sellPrice,
+                },
+                inventory: prev.inventory.filter(i => i.id !== itemId),
+            };
+        });
+    }, [setState]);
+
+    const equipItem = useCallback((itemId: string) => {
+        setState((prev) => {
+            // Find item in inventory
+            const item = prev.inventory.find(i => i.id === itemId);
+            if (!item) return prev;
+
+            // Remove from inventory
+            const newInventory = prev.inventory.filter(i => i.id !== itemId);
+
+            // Remove existing item in same slot and add to inventory
+            const currentItem = prev.equipment.find(e => e.slot === item.slot);
+            if (currentItem) {
+                newInventory.push({ ...currentItem, equipped: false });
+            }
+
+            // Equip new item
+            const newEquipment = prev.equipment.filter(e => e.slot !== item.slot);
+            newEquipment.push({ ...item, equipped: true });
+
+            return {
+                ...prev,
+                equipment: newEquipment,
+                inventory: newInventory,
+            };
+        });
+    }, [setState]);
+
+    const unequipItem = useCallback((slot: EquipmentSlot) => {
+        setState((prev) => {
+            // Find equipped item
+            const item = prev.equipment.find(e => e.slot === slot);
+            if (!item) return prev;
+
+            return {
+                ...prev,
+                equipment: prev.equipment.filter(e => e.slot !== slot),
+                inventory: [...prev.inventory, { ...item, equipped: false }],
+            };
+        });
+    }, [setState]);
+
     // ===== Territory Management =====
 
     const captureTerritory = useCallback((territoryId: string) => {
@@ -399,6 +481,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         addExperience,
         addEquipment,
         removeEquipment,
+        buyEquipment,
+        sellEquipment,
+        equipItem,
+        unequipItem,
         captureTerritory,
         loseTerritory,
         updateTerritoryControl,

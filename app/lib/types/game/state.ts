@@ -7,7 +7,7 @@
 import { FamilyMember, FamilyStats } from './family';
 import { Territory, TerritoryStats } from './territory';
 import { Operation } from './headquarters';
-import { EquipmentItemType, MaterialStatus } from './character';
+import { EquipmentItemType, MaterialStatus, EquipmentSlot } from './character';
 
 /**
  * Player statistics and resources
@@ -50,7 +50,8 @@ export interface GameState {
     chapter: ChapterData;
 
     // Assets
-    equipment: EquipmentItemType[];
+    equipment: EquipmentItemType[];  // Currently equipped items
+    inventory: EquipmentItemType[];  // Owned but not equipped items
     territories: Territory[];
 
     // Operations
@@ -83,6 +84,10 @@ export interface GameActions {
     // Equipment
     addEquipment: (item: EquipmentItemType) => void;
     removeEquipment: (slot: string) => void;
+    buyEquipment: (item: EquipmentItemType) => boolean;
+    sellEquipment: (itemId: string) => void;
+    equipItem: (itemId: string) => void;
+    unequipItem: (slot: EquipmentSlot) => void;
 
     // Territories
     captureTerritory: (territoryId: string) => void;
@@ -127,6 +132,7 @@ export const DEFAULT_GAME_STATE: GameState = {
         reputation: 0,
     },
     equipment: [],
+    inventory: [],
     territories: [],
     operations: [],
     activeOperations: [],
