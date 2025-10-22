@@ -1,20 +1,26 @@
+"use client";
+
 import { CrimeItem } from "./crime-item/crime-item";
+import { BusinessService } from "@/app/lib/data/services";
 
 export const BusinessContent = () => {
-    const crimeTiers = [
-        { name: "Petty Theft", duration: 30, reward: 100, risk: "Low" },
-        { name: "Pickpocketing", duration: 60, reward: 250, risk: "Low" },
-        { name: "Grand Theft Auto", duration: 180, reward: 1000, risk: "Medium" },
-        { name: "Bank Robbery", duration: 300, reward: 5000, risk: "High" },
-        { name: "Drug Trafficking", duration: 600, reward: 15000, risk: "Very High" },
-        { name: "Elite Heist", duration: 1200, reward: 50000, risk: "Extreme" }
-    ];
+    const crimeTiers = BusinessService.getCrimeTiers();
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {crimeTiers.map((crime, index) => (
-                <CrimeItem key={index} crime={crime} />
-            ))}
+        <div className="bg-nordic-bg p-6">
+            <h2 className="text-nordic-text-primary text-2xl font-bold mb-6">Criminal Operations</h2>
+            <div className="space-y-8">
+                {crimeTiers.map((tier) => (
+                    <div key={tier.tier}>
+                        <h3 className="text-nordic-text-secondary text-lg font-semibold mb-4">{tier.tier}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {tier.crimes.map((crime) => (
+                                <CrimeItem key={crime.name} crime={crime} />
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
