@@ -17,6 +17,7 @@ import { mockFamilyMembers, mockFamilyStats } from '../data/mock/family';
 import { mockSecurityLevels, mockOperations } from '../data/mock/headquarters';
 import { mockTerritories, mockTerritoryStats } from '../data/mock/territory';
 import { mockBusinesses } from '../data/mock/businesses';
+import { mockRivalGangs } from '../data/mock/rival-gangs';
 
 const STORAGE_KEY = 'mafios-game-state';
 
@@ -35,6 +36,10 @@ interface GameProviderProps {
  * Initialize game state with mock data from services
  */
 const initializeGameState = (): GameState => {
+    // Calculate gang stats
+    const hostileGangs = mockRivalGangs.filter(g => g.relationStatus === 'Hostile').length;
+    const alliedGangs = mockRivalGangs.filter(g => g.relationStatus === 'Allied').length;
+
     return {
         ...DEFAULT_GAME_STATE,
         equipment: CharacterService.getEquipment(),
@@ -48,6 +53,14 @@ const initializeGameState = (): GameState => {
         territories: mockTerritories,
         territoryStats: mockTerritoryStats,
         businesses: mockBusinesses,
+        rivalGangs: mockRivalGangs,
+        gangStats: {
+            totalRivalGangs: mockRivalGangs.length,
+            hostileGangs,
+            alliedGangs,
+            activeEvents: 0,
+            territoriesLostToGangs: 0,
+        },
     };
 };
 
@@ -654,6 +667,185 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         }));
     }, [setState]);
 
+    // ===== Rival Gang Management =====
+
+    const updateGangRelation = useCallback((gangId: string, hostilityChange: number) => {
+        setState((prev) => {
+            const updatedGangs = prev.rivalGangs.map(gang => {
+                if (gang.id !== gangId) return gang;
+
+                const newHostility = Math.max(-100, Math.min(100, gang.hostility + hostilityChange));
+                let newStatus: 'Hostile' | 'Neutral' | 'Truce' | 'Allied' = gang.relationStatus;
+
+                // Update relation status based on hostility
+                if (newHostility <= -60) newStatus = 'Hostile';
+                else if (newHostility <= -20) newStatus = 'Neutral';
+                else if (newHostility <= 40) newStatus = 'Truce';
+                else newStatus = 'Allied';
+
+                return {
+                    ...gang,
+                    hostility: newHostility,
+                    relationStatus: newStatus,
+                };
+            });
+
+            const hostileGangs = updatedGangs.filter(g => g.relationStatus === 'Hostile').length;
+            const alliedGangs = updatedGangs.filter(g => g.relationStatus === 'Allied').length;
+
+            return {
+                ...prev,
+                rivalGangs: updatedGangs,
+                gangStats: {
+                    ...prev.gangStats,
+                    hostileGangs,
+                    alliedGangs,
+                },
+            };
+        });
+    }, [setState]);
+
+    const resolveGangEvent = useCallback((eventId: string, outcome: 'success' | 'failure' | 'negotiated') => {
+        setState((prev) => {
+            const event = prev.gangEvents.find(e => e.id === eventId);
+            if (!event) return prev;
+
+            const updatedEvents = prev.gangEvents.map(e =>
+                e.id === eventId ? { ...e, resolved: true, outcome } : e
+            );
+
+            const activeGangEvents = prev.activeGangEvents.filter(id => id !== eventId);
+
+            // Apply event consequences
+            let newState = { ...prev };
+            if (event.respektChange) {
+                newState.player = { ...newState.player, respekt: Math.max(0, Math.min(100, newState.player.respekt + event.respektChange)) };
+            }
+            if (event.kontanterChange) {
+                newState.player = { ...newState.player, kontanter: Math.max(0, newState.player.kontanter + event.kontanterChange) };
+            }
+            if (event.hostilityChange) {
+                newState.rivalGangs = newState.rivalGangs.map(g =>
+                    g.id === event.gangId
+                        ? { ...g, hostility: Math.max(-100, Math.min(100, g.hostility + event.hostilityChange)) }
+                        : g
+                );
+            }
+
+            return {
+                ...newState,
+                gangEvents: updatedEvents,
+                activeGangEvents,
+                gangStats: {
+                    ...prev.gangStats,
+                    activeEvents: activeGangEvents.length,
+                },
+            };
+        });
+    }, [setState]);
+
+    const attackGang = useCallback((gangId: string): boolean => {
+        let success = false;
+        setState((prev) => {
+            const gang = prev.rivalGangs.find(g => g.id === gangId);
+            if (!gang) return prev;
+
+            // Calculate attack outcome based on strength
+            const playerStrength = prev.player.respekt + (prev.chapter.members.length * 5);
+            const successChance = (playerStrength / (playerStrength + gang.strength)) * 100;
+            success = Math.random() * 100 < successChance;
+
+            if (success) {
+                // Successful attack: increase hostility, gain respect
+                return {
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        respekt: Math.min(100, prev.player.respekt + 10),
+                        polisbevakning: Math.min(100, prev.player.polisbevakning + 20),
+                    },
+                    rivalGangs: prev.rivalGangs.map(g =>
+                        g.id === gangId
+                            ? { ...g, hostility: Math.max(-100, g.hostility - 30), strength: Math.max(1, g.strength - 5) }
+                            : g
+                    ),
+                };
+            } else {
+                // Failed attack: increase hostility, lose respect
+                return {
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        respekt: Math.max(0, prev.player.respekt - 5),
+                        polisbevakning: Math.min(100, prev.player.polisbevakning + 10),
+                    },
+                    rivalGangs: prev.rivalGangs.map(g =>
+                        g.id === gangId
+                            ? { ...g, hostility: Math.max(-100, g.hostility - 20) }
+                            : g
+                    ),
+                };
+            }
+        });
+        return success;
+    }, [setState]);
+
+    const negotiateWithGang = useCallback((gangId: string, offer: 'truce' | 'alliance' | 'payment'): boolean => {
+        let success = false;
+        setState((prev) => {
+            const gang = prev.rivalGangs.find(g => g.id === gangId);
+            if (!gang) return prev;
+
+            let hostilityChange = 0;
+            let kostnad = 0;
+
+            switch (offer) {
+                case 'payment':
+                    kostnad = 50000;
+                    hostilityChange = 30;
+                    break;
+                case 'truce':
+                    hostilityChange = 40;
+                    break;
+                case 'alliance':
+                    hostilityChange = 60;
+                    break;
+            }
+
+            // Check if player can afford payment
+            if (offer === 'payment' && prev.player.kontanter < kostnad) {
+                return prev;
+            }
+
+            // Calculate success based on current hostility
+            const successChance = Math.max(20, Math.min(80, 50 + gang.hostility / 2));
+            success = Math.random() * 100 < successChance;
+
+            if (success) {
+                return {
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        kontanter: offer === 'payment' ? prev.player.kontanter - kostnad : prev.player.kontanter,
+                        inflytande: Math.min(500, prev.player.inflytande + 10),
+                    },
+                    rivalGangs: prev.rivalGangs.map(g =>
+                        g.id === gangId
+                            ? {
+                                ...g,
+                                hostility: Math.min(100, g.hostility + hostilityChange),
+                                relationStatus: offer === 'alliance' ? 'Allied' as const : 'Truce' as const,
+                            }
+                            : g
+                    ),
+                };
+            }
+
+            return prev;
+        });
+        return success;
+    }, [setState]);
+
     // ===== Family Management =====
 
     const addMember = useCallback((member: FamilyMember) => {
@@ -749,6 +941,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         upgradeBusiness,
         assignManagerToBusiness,
         removeManagerFromBusiness,
+        updateGangRelation,
+        resolveGangEvent,
+        attackGang,
+        negotiateWithGang,
         saveGame,
         loadGame,
         resetGame,
