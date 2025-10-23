@@ -16,6 +16,7 @@ import { BusinessService } from '../data/services/business.service';
 import { mockFamilyMembers, mockFamilyStats } from '../data/mock/family';
 import { mockSecurityLevels, mockOperations } from '../data/mock/headquarters';
 import { mockTerritories, mockTerritoryStats } from '../data/mock/territory';
+import { mockBusinesses } from '../data/mock/businesses';
 
 const STORAGE_KEY = 'mafios-game-state';
 
@@ -46,6 +47,7 @@ const initializeGameState = (): GameState => {
         operations: mockOperations,
         territories: mockTerritories,
         territoryStats: mockTerritoryStats,
+        businesses: mockBusinesses,
     };
 };
 
@@ -96,7 +98,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         return () => clearInterval(saveInterval);
     }, []);
 
-    // Passive income from territories and operations every 60 seconds
+    // Passive income from territories, operations, and businesses every 60 seconds
     useEffect(() => {
         const incomeInterval = setInterval(() => {
             setState((prev) => {
@@ -115,16 +117,30 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
                     return sum + (op.heatReductionPerTick || 0);
                 }, 0);
 
-                const totalIncome = territoryIncome + operationIncome;
+                // Calculate income from owned businesses
+                const ownedBusinesses = prev.businesses.filter(b => b.status === 'owned');
+                const businessIncome = ownedBusinesses.reduce((sum, b) => {
+                    // Apply efficiency modifier (efficiency is 0-100, convert to multiplier)
+                    const efficiencyMultiplier = b.efficiency / 100;
+                    return sum + Math.floor(b.incomePerTick * efficiencyMultiplier);
+                }, 0);
 
-                // Only update if there's income or heat reduction
-                if (totalIncome > 0 || heatReduction > 0) {
+                // Accumulate heat from businesses
+                const businessHeat = ownedBusinesses.reduce((sum, b) => {
+                    return sum + b.heatGeneration;
+                }, 0);
+
+                const totalIncome = territoryIncome + operationIncome + businessIncome;
+                const netHeatChange = businessHeat - heatReduction;
+
+                // Only update if there's income or heat change
+                if (totalIncome > 0 || netHeatChange !== 0) {
                     return {
                         ...prev,
                         player: {
                             ...prev.player,
                             kontanter: prev.player.kontanter + totalIncome,
-                            polisbevakning: Math.max(0, prev.player.polisbevakning - heatReduction),
+                            polisbevakning: Math.max(0, Math.min(100, prev.player.polisbevakning + netHeatChange)),
                         },
                     };
                 }
@@ -512,6 +528,132 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         }));
     }, [setState]);
 
+    // ===== Business Management =====
+
+    const purchaseBusiness = useCallback((businessId: string): boolean => {
+        let success = false;
+        setState((prev) => {
+            const business = prev.businesses.find(b => b.id === businessId);
+            if (!business || business.status === 'owned') return prev;
+
+            // Check requirements
+            if (prev.player.level < business.requiredLevel) return prev;
+            if (prev.player.respekt < business.requiredRespekt) return prev;
+            if (prev.player.kontanter < business.purchasePrice) return prev;
+
+            // Check prerequisites
+            if (business.prerequisiteBusinesses) {
+                const hasPrerequisites = business.prerequisiteBusinesses.every(prereqId =>
+                    prev.businesses.find(b => b.id === prereqId)?.status === 'owned'
+                );
+                if (!hasPrerequisites) return prev;
+            }
+
+            success = true;
+
+            const updatedBusinesses = prev.businesses.map(b =>
+                b.id === businessId
+                    ? { ...b, status: 'owned' as const }
+                    : b
+            );
+
+            const ownedBusinesses = updatedBusinesses.filter(b => b.status === 'owned');
+            const totalIncome = ownedBusinesses.reduce((sum, b) => sum + b.incomePerTick, 0);
+            const totalLaundering = ownedBusinesses.reduce((sum, b) => sum + (b.launderingCapacity || 0), 0);
+
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    kontanter: prev.player.kontanter - business.purchasePrice,
+                },
+                businesses: updatedBusinesses,
+                businessStats: {
+                    ...prev.businessStats,
+                    ownedBusinesses: ownedBusinesses.length,
+                    totalIncome,
+                    totalLaunderingCapacity: totalLaundering,
+                },
+            };
+        });
+        return success;
+    }, [setState]);
+
+    const upgradeBusiness = useCallback((businessId: string): boolean => {
+        let success = false;
+        setState((prev) => {
+            const business = prev.businesses.find(b => b.id === businessId);
+            if (!business || business.status !== 'owned') return prev;
+            if (business.level >= business.maxLevel) return prev;
+
+            const upgradeCost = business.upgradeCost * business.level;
+            if (prev.player.kontanter < upgradeCost) return prev;
+
+            success = true;
+
+            const updatedBusinesses = prev.businesses.map(b =>
+                b.id === businessId
+                    ? {
+                        ...b,
+                        level: b.level + 1,
+                        incomePerTick: Math.floor(b.incomePerTick * 1.3),
+                        efficiency: Math.min(100, b.efficiency + 5),
+                        launderingCapacity: b.launderingCapacity ? Math.floor(b.launderingCapacity * 1.25) : undefined,
+                    }
+                    : b
+            );
+
+            const ownedBusinesses = updatedBusinesses.filter(b => b.status === 'owned');
+            const totalIncome = ownedBusinesses.reduce((sum, b) => sum + b.incomePerTick, 0);
+            const totalLaundering = ownedBusinesses.reduce((sum, b) => sum + (b.launderingCapacity || 0), 0);
+
+            return {
+                ...prev,
+                player: {
+                    ...prev.player,
+                    kontanter: prev.player.kontanter - upgradeCost,
+                },
+                businesses: updatedBusinesses,
+                businessStats: {
+                    ...prev.businessStats,
+                    totalIncome,
+                    totalLaunderingCapacity: totalLaundering,
+                },
+            };
+        });
+        return success;
+    }, [setState]);
+
+    const assignManagerToBusiness = useCallback((businessId: string, memberId: string) => {
+        setState((prev) => ({
+            ...prev,
+            businesses: prev.businesses.map(b =>
+                b.id === businessId
+                    ? {
+                        ...b,
+                        managerId: memberId,
+                        efficiency: Math.min(100, b.efficiency + 10),
+                    }
+                    : b
+            ),
+        }));
+    }, [setState]);
+
+    const removeManagerFromBusiness = useCallback((businessId: string) => {
+        setState((prev) => ({
+            ...prev,
+            businesses: prev.businesses.map(b =>
+                b.id === businessId
+                    ? {
+                        ...b,
+                        managerId: undefined,
+                        efficiency: Math.max(0, b.efficiency - 10),
+                    }
+                    : b
+            ),
+        }));
+    }, [setState]);
+
     // ===== Family Management =====
 
     const addMember = useCallback((member: FamilyMember) => {
@@ -603,6 +745,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         addMember,
         removeMember,
         updateMemberLoyalty,
+        purchaseBusiness,
+        upgradeBusiness,
+        assignManagerToBusiness,
+        removeManagerFromBusiness,
         saveGame,
         loadGame,
         resetGame,

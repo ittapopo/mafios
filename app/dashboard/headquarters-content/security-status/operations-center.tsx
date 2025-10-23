@@ -37,7 +37,7 @@ export const OperationsCenter = () => {
         } else {
             setActionResult({
                 success: false,
-                message: `Not enough kontanter! Need ${op.activationCost.toLocaleString()} SEK`,
+                message: `Not enough cash! Need ${op.activationCost.toLocaleString()} SEK`,
             });
         }
         setTimeout(() => setActionResult(null), 3000);
@@ -69,7 +69,7 @@ export const OperationsCenter = () => {
             } else {
                 setActionResult({
                     success: false,
-                    message: `Not enough kontanter! Need ${upgradeCost.toLocaleString()} SEK`,
+                    message: `Not enough cash! Need ${upgradeCost.toLocaleString()} SEK`,
                 });
             }
         }

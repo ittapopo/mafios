@@ -27,28 +27,28 @@ export const CharacterStatsCard = () => {
             <div className="flex justify-between text-nordic-text-secondary">
                 <span className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    Respekt
+                    Respect
                 </span>
                 <span className="text-nordic-text-primary font-semibold">{state.player.respekt}/100</span>
             </div>
             <div className="flex justify-between text-nordic-text-secondary">
                 <span className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    Inflytande
+                    Influence
                 </span>
                 <span className="text-nordic-text-primary font-semibold">{state.player.inflytande}/500</span>
             </div>
             <div className="flex justify-between text-nordic-text-secondary">
                 <span className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
-                    Kontanter
+                    Cash
                 </span>
                 <span className="text-nordic-text-primary font-semibold">{state.player.kontanter.toLocaleString()} SEK</span>
             </div>
             <div className="flex justify-between text-nordic-text-secondary">
                 <span className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Polisbevakning
+                    Police Heat
                 </span>
                 <span className={`font-semibold ${
                     state.player.polisbevakning > 70 ? 'text-nordic-status-danger' :

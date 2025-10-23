@@ -47,7 +47,7 @@ export const TerritoryContent = () => {
         const attackCost = territory.defenseLevel * 10000;
 
         if (state.player.kontanter < attackCost) {
-            alert(`Not enough kontanter! Need ${attackCost.toLocaleString()} SEK`);
+            alert(`Not enough cash! Need ${attackCost.toLocaleString()} SEK`);
             return;
         }
 
@@ -106,7 +106,7 @@ export const TerritoryContent = () => {
         const defenseCost = 5000;
 
         if (state.player.kontanter < defenseCost) {
-            alert(`Not enough kontanter! Need ${defenseCost.toLocaleString()} SEK`);
+            alert(`Not enough cash! Need ${defenseCost.toLocaleString()} SEK`);
             return;
         }
 
