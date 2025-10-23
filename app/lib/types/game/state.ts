@@ -8,6 +8,7 @@ import { FamilyMember, FamilyStats } from './family';
 import { Territory, TerritoryStats } from './territory';
 import { Operation } from './headquarters';
 import { EquipmentItemType, MaterialStatus, EquipmentSlot } from './character';
+import { Business, BusinessStats } from './business';
 
 /**
  * Player statistics and resources
@@ -53,6 +54,7 @@ export interface GameState {
     equipment: EquipmentItemType[];  // Currently equipped items
     inventory: EquipmentItemType[];  // Owned but not equipped items
     territories: Territory[];
+    businesses: Business[];
 
     // Operations
     operations: Operation[];
@@ -60,6 +62,7 @@ export interface GameState {
 
     // Stats
     territoryStats: TerritoryStats;
+    businessStats: BusinessStats;
 
     // Metadata
     lastSaved: number; // timestamp
@@ -106,6 +109,12 @@ export interface GameActions {
     removeMember: (memberId: string) => void;
     updateMemberLoyalty: (memberId: string, loyalty: number) => void;
 
+    // Businesses
+    purchaseBusiness: (businessId: string) => boolean;
+    upgradeBusiness: (businessId: string) => boolean;
+    assignManagerToBusiness: (businessId: string, memberId: string) => void;
+    removeManagerFromBusiness: (businessId: string) => void;
+
     // Persistence
     saveGame: () => void;
     loadGame: () => void;
@@ -137,6 +146,7 @@ export const DEFAULT_GAME_STATE: GameState = {
     equipment: [],
     inventory: [],
     territories: [],
+    businesses: [],
     operations: [],
     activeOperations: [],
     territoryStats: {
@@ -144,6 +154,12 @@ export const DEFAULT_GAME_STATE: GameState = {
         controlledTerritories: 0,
         contestedTerritories: 0,
         totalIncome: 0,
+    },
+    businessStats: {
+        totalBusinesses: 10,
+        ownedBusinesses: 0,
+        totalIncome: 0,
+        totalLaunderingCapacity: 0,
     },
     lastSaved: Date.now(),
     playTime: 0,

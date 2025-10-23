@@ -48,7 +48,7 @@ export const EquipmentShop = () => {
         } else {
             setPurchaseResult({
                 success: false,
-                message: `Not enough kontanter! Need ${item.price.toLocaleString()} SEK`,
+                message: `Not enough cash! Need ${item.price.toLocaleString()} SEK`,
             });
         }
         setTimeout(() => setPurchaseResult(null), 3000);

@@ -11,25 +11,25 @@ const MaterialStatus = () => {
     const materials = [
         {
             icon: <DollarSign />,
-            label: 'Kontanter',
+            label: 'Cash',
             value: `${state.player.kontanter.toLocaleString()} SEK`,
             status: state.player.kontanter > 100000 ? 'Abundant' : state.player.kontanter > 50000 ? 'Moderate' : 'Low'
         },
         {
             icon: <TrendingUp />,
-            label: 'Inflytande',
+            label: 'Influence',
             value: `${state.player.inflytande}/500`,
             status: state.player.inflytande > 300 ? 'Strong' : state.player.inflytande > 150 ? 'Growing' : 'Weak'
         },
         {
             icon: <Users />,
-            label: 'Respekt',
+            label: 'Respect',
             value: `${state.player.respekt}/100`,
             status: state.player.respekt > 70 ? 'Feared' : state.player.respekt > 40 ? 'Known' : 'Unknown'
         },
         {
             icon: <AlertTriangle />,
-            label: 'Polisbevakning',
+            label: 'Police Heat',
             value: `${state.player.polisbevakning}/100`,
             status: state.player.polisbevakning > 70 ? 'Critical' : state.player.polisbevakning > 40 ? 'Elevated' : 'Low'
         },

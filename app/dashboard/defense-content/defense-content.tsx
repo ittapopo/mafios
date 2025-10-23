@@ -73,7 +73,7 @@ export const DefenseContent = () => {
         const cost = upgrade.cost * (upgrade.level + 1); // Cost increases with level
 
         if (state.player.kontanter < cost) {
-            setUpgradeResult(`Not enough kontanter! Need ${cost.toLocaleString()} SEK`);
+            setUpgradeResult(`Not enough cash! Need ${cost.toLocaleString()} SEK`);
             setTimeout(() => setUpgradeResult(null), 3000);
             return;
         }
@@ -97,7 +97,7 @@ export const DefenseContent = () => {
         const cost = 10000;
 
         if (state.player.kontanter < cost) {
-            setUpgradeResult(`Not enough kontanter! Need ${cost.toLocaleString()} SEK`);
+            setUpgradeResult(`Not enough cash! Need ${cost.toLocaleString()} SEK`);
             setTimeout(() => setUpgradeResult(null), 3000);
             return;
         }
@@ -121,7 +121,7 @@ export const DefenseContent = () => {
             {/* Current Heat Status */}
             <div className="bg-nordic-bg-dark p-6 rounded-lg border-2 border-nordic-border mb-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-nordic-text-primary text-xl font-semibold">Polisbevakning Status</h3>
+                    <h3 className="text-nordic-text-primary text-xl font-semibold">Police Heat Status</h3>
                     <span className={`text-2xl font-bold ${
                         state.player.polisbevakning > 70 ? 'text-nordic-status-danger' :
                         state.player.polisbevakning > 40 ? 'text-nordic-status-warning' :
