@@ -9,6 +9,7 @@ import { Territory, TerritoryStats } from './territory';
 import { Operation } from './headquarters';
 import { EquipmentItemType, MaterialStatus, EquipmentSlot } from './character';
 import { Business, BusinessStats } from './business';
+import { RivalGang, GangEvent, GangStats } from './gang';
 
 /**
  * Player statistics and resources
@@ -60,9 +61,15 @@ export interface GameState {
     operations: Operation[];
     activeOperations: string[]; // IDs of running operations
 
+    // Rival Gangs
+    rivalGangs: RivalGang[];
+    gangEvents: GangEvent[];
+    activeGangEvents: string[]; // IDs of unresolved events
+
     // Stats
     territoryStats: TerritoryStats;
     businessStats: BusinessStats;
+    gangStats: GangStats;
 
     // Metadata
     lastSaved: number; // timestamp
@@ -115,6 +122,12 @@ export interface GameActions {
     assignManagerToBusiness: (businessId: string, memberId: string) => void;
     removeManagerFromBusiness: (businessId: string) => void;
 
+    // Rival Gangs
+    updateGangRelation: (gangId: string, hostilityChange: number) => void;
+    resolveGangEvent: (eventId: string, outcome: 'success' | 'failure' | 'negotiated') => void;
+    attackGang: (gangId: string) => boolean;
+    negotiateWithGang: (gangId: string, offer: 'truce' | 'alliance' | 'payment') => boolean;
+
     // Persistence
     saveGame: () => void;
     loadGame: () => void;
@@ -149,6 +162,9 @@ export const DEFAULT_GAME_STATE: GameState = {
     businesses: [],
     operations: [],
     activeOperations: [],
+    rivalGangs: [],
+    gangEvents: [],
+    activeGangEvents: [],
     territoryStats: {
         totalTerritories: 12,
         controlledTerritories: 0,
@@ -160,6 +176,13 @@ export const DEFAULT_GAME_STATE: GameState = {
         ownedBusinesses: 0,
         totalIncome: 0,
         totalLaunderingCapacity: 0,
+    },
+    gangStats: {
+        totalRivalGangs: 4,
+        hostileGangs: 0,
+        alliedGangs: 0,
+        activeEvents: 0,
+        territoriesLostToGangs: 0,
     },
     lastSaved: Date.now(),
     playTime: 0,
