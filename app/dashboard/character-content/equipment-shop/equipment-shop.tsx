@@ -15,8 +15,8 @@ export const EquipmentShop = () => {
     const [purchaseResult, setPurchaseResult] = useState<{ success: boolean; message: string } | null>(null);
 
     const shopInventory = CharacterService.getShopInventory();
-    const playerInventory = state.inventory;
-    const equippedItems = state.equipment;
+    const playerInventory = state.inventory ?? [];
+    const equippedItems = state.equipment ?? [];
 
     const getRarityColor = (rarity: string) => {
         switch (rarity) {
@@ -88,7 +88,7 @@ export const EquipmentShop = () => {
 
     const filteredInventoryItems = selectedSlot === 'All'
         ? playerInventory
-        : playerInventory.filter(item => item.slot === selectedSlot);
+        : playerInventory?.filter(item => item.slot === selectedSlot) ?? [];
 
     return (
         <div className="bg-nordic-bg p-6">

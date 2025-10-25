@@ -287,13 +287,13 @@ const GangCard = ({ gang }: GangCardProps) => {
 export const RivalGangsContent = () => {
     const { state } = useGameState();
 
-    const hostileGangs = state.rivalGangs.filter(g => g.relationStatus === 'Hostile');
-    const neutralGangs = state.rivalGangs.filter(g => g.relationStatus === 'Neutral');
-    const truceGangs = state.rivalGangs.filter(g => g.relationStatus === 'Truce');
-    const alliedGangs = state.rivalGangs.filter(g => g.relationStatus === 'Allied');
+    const hostileGangs = state.rivalGangs?.filter(g => g.relationStatus === 'Hostile') ?? [];
+    const neutralGangs = state.rivalGangs?.filter(g => g.relationStatus === 'Neutral') ?? [];
+    const truceGangs = state.rivalGangs?.filter(g => g.relationStatus === 'Truce') ?? [];
+    const alliedGangs = state.rivalGangs?.filter(g => g.relationStatus === 'Allied') ?? [];
 
     // Get active unresolved events
-    const activeEvents = state.gangEvents.filter(e => !e.resolved && state.activeGangEvents.includes(e.id));
+    const activeEvents = state.gangEvents?.filter(e => !e.resolved && state.activeGangEvents?.includes(e.id)) ?? [];
 
     return (
         <div className="bg-nordic-bg p-6">

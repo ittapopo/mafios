@@ -8,7 +8,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { GameState, GameActions, DEFAULT_GAME_STATE, PlayerStats } from '../types/game/state';
-import { EquipmentItemType, EquipmentSlot } from '../types';
+import { EquipmentItemType, EquipmentSlot, GameEvent } from '../types';
 import { FamilyMember } from '../types/game/family';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { CharacterService } from '../data/services/character.service';
@@ -18,6 +18,7 @@ import { mockSecurityLevels, mockOperations } from '../data/mock/headquarters';
 import { mockTerritories, mockTerritoryStats } from '../data/mock/territory';
 import { mockBusinesses } from '../data/mock/businesses';
 import { mockRivalGangs } from '../data/mock/rival-gangs';
+import { mockRandomEvents } from '../data/mock/random-events';
 
 const STORAGE_KEY = 'mafios-game-state';
 
@@ -40,6 +41,13 @@ const initializeGameState = (): GameState => {
     const hostileGangs = mockRivalGangs.filter(g => g.relationStatus === 'Hostile').length;
     const alliedGangs = mockRivalGangs.filter(g => g.relationStatus === 'Allied').length;
 
+    // Initialize random events with default state
+    const initializedEvents = mockRandomEvents.map(event => ({
+        ...event,
+        triggered: false,
+        resolved: false,
+    }));
+
     return {
         ...DEFAULT_GAME_STATE,
         equipment: CharacterService.getEquipment(),
@@ -54,6 +62,7 @@ const initializeGameState = (): GameState => {
         territoryStats: mockTerritoryStats,
         businesses: mockBusinesses,
         rivalGangs: mockRivalGangs,
+        randomEvents: initializedEvents,
         gangStats: {
             totalRivalGangs: mockRivalGangs.length,
             hostileGangs,
@@ -81,6 +90,98 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         if (state.equipment.length === 0 && state.chapter.members.length === 0) {
             setState(initializeGameState());
         }
+
+        // Comprehensive migration for old save states
+        setState((prev) => {
+            let needsMigration = false;
+            const updates: Partial<GameState> = {};
+
+            // Migrate randomEvents
+            if (!prev.randomEvents || !Array.isArray(prev.randomEvents)) {
+                needsMigration = true;
+                updates.randomEvents = mockRandomEvents.map(event => ({
+                    ...event,
+                    triggered: false,
+                    resolved: false,
+                }));
+            }
+
+            // Migrate activeEvents
+            if (!prev.activeEvents || !Array.isArray(prev.activeEvents)) {
+                needsMigration = true;
+                updates.activeEvents = [];
+            }
+
+            // Migrate eventHistory
+            if (!prev.eventHistory || !Array.isArray(prev.eventHistory)) {
+                needsMigration = true;
+                updates.eventHistory = [];
+            }
+
+            // Migrate inventory
+            if (!prev.inventory || !Array.isArray(prev.inventory)) {
+                needsMigration = true;
+                updates.inventory = [];
+            }
+
+            // Migrate rivalGangs
+            if (!prev.rivalGangs || !Array.isArray(prev.rivalGangs)) {
+                needsMigration = true;
+                updates.rivalGangs = mockRivalGangs;
+            }
+
+            // Migrate gangEvents
+            if (!prev.gangEvents || !Array.isArray(prev.gangEvents)) {
+                needsMigration = true;
+                updates.gangEvents = [];
+            }
+
+            // Migrate activeGangEvents
+            if (!prev.activeGangEvents || !Array.isArray(prev.activeGangEvents)) {
+                needsMigration = true;
+                updates.activeGangEvents = [];
+            }
+
+            // Migrate eventStats
+            if (!prev.eventStats) {
+                needsMigration = true;
+                updates.eventStats = {
+                    totalTriggered: 0,
+                    totalResolved: 0,
+                    successfulOutcomes: 0,
+                    failedOutcomes: 0,
+                    byType: {
+                        police_raid: 0,
+                        opportunity: 0,
+                        member_issue: 0,
+                        rival_incident: 0,
+                        informant: 0,
+                        betrayal: 0,
+                        market_shift: 0,
+                        territory_threat: 0,
+                        lucky_break: 0,
+                        inspection: 0,
+                    },
+                    recentEvents: [],
+                };
+            }
+
+            // Migrate gangStats
+            if (!prev.gangStats) {
+                needsMigration = true;
+                const hostileGangs = (updates.rivalGangs || prev.rivalGangs || []).filter(g => g.relationStatus === 'Hostile').length;
+                const alliedGangs = (updates.rivalGangs || prev.rivalGangs || []).filter(g => g.relationStatus === 'Allied').length;
+                updates.gangStats = {
+                    totalRivalGangs: (updates.rivalGangs || prev.rivalGangs || []).length,
+                    hostileGangs,
+                    alliedGangs,
+                    activeEvents: 0,
+                    territoriesLostToGangs: 0,
+                };
+            }
+
+            return needsMigration ? { ...prev, ...updates } : prev;
+        });
 
         setIsLoading(false);
 
@@ -308,6 +409,59 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
             if (currentTimeout) clearTimeout(currentTimeout);
         };
     }, [setState]);
+
+    // Random event trigger check every 3 minutes
+    useEffect(() => {
+        const triggerCheck = () => {
+            setState((prev) => {
+                const now = Date.now();
+                const newlyTriggeredEvents: string[] = [];
+
+                prev.randomEvents.forEach((event) => {
+                    // Skip if already triggered or resolved
+                    if (event.triggered || event.resolved) return;
+
+                    // Check if conditions are met
+                    if (!checkEventConditions(event, prev)) return;
+
+                    // Roll for probability
+                    const roll = Math.random() * 100;
+                    if (roll > event.triggerConditions.probability) return;
+
+                    // Trigger the event
+                    newlyTriggeredEvents.push(event.id);
+                });
+
+                if (newlyTriggeredEvents.length === 0) return prev;
+
+                // Update events
+                const updatedEvents = prev.randomEvents.map(event =>
+                    newlyTriggeredEvents.includes(event.id)
+                        ? { ...event, triggered: true, triggeredAt: now, lastTriggered: now }
+                        : event
+                );
+
+                return {
+                    ...prev,
+                    randomEvents: updatedEvents,
+                    activeEvents: [...prev.activeEvents, ...newlyTriggeredEvents],
+                    eventStats: {
+                        ...prev.eventStats,
+                        totalTriggered: prev.eventStats.totalTriggered + newlyTriggeredEvents.length,
+                    },
+                };
+            });
+        };
+
+        // Run immediately on mount (disabled for testing)
+        // triggerCheck();
+
+        // Then run every 3 minutes (180000ms)
+        const eventCheckInterval = setInterval(triggerCheck, 180000);
+
+        return () => clearInterval(eventCheckInterval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Passive income from territories, operations, and businesses every 60 seconds
     useEffect(() => {
@@ -1231,6 +1385,245 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         });
     }, [setState]);
 
+    // ===== Random Events =====
+
+    /**
+     * Check if an event's trigger conditions are met
+     */
+    const checkEventConditions = useCallback((event: GameEvent, gameState: GameState): boolean => {
+        const { triggerConditions } = event;
+        const { player, territories, businesses, operations, chapter } = gameState;
+
+        // Check heat thresholds
+        if (triggerConditions.minHeat !== undefined && player.polisbevakning < triggerConditions.minHeat) return false;
+        if (triggerConditions.maxHeat !== undefined && player.polisbevakning > triggerConditions.maxHeat) return false;
+
+        // Check cash thresholds
+        if (triggerConditions.minKontanter !== undefined && player.kontanter < triggerConditions.minKontanter) return false;
+        if (triggerConditions.maxKontanter !== undefined && player.kontanter > triggerConditions.maxKontanter) return false;
+
+        // Check respect thresholds
+        if (triggerConditions.minRespekt !== undefined && player.respekt < triggerConditions.minRespekt) return false;
+        if (triggerConditions.maxRespekt !== undefined && player.respekt > triggerConditions.maxRespekt) return false;
+
+        // Check asset requirements
+        const controlledCount = territories.filter(t => t.status === 'Controlled').length;
+        if (triggerConditions.controlledTerritories !== undefined && controlledCount < triggerConditions.controlledTerritories) return false;
+
+        const ownedCount = businesses.filter(b => b.status === 'owned').length;
+        if (triggerConditions.ownedBusinesses !== undefined && ownedCount < triggerConditions.ownedBusinesses) return false;
+
+        const activeOpsCount = gameState.activeOperations.length;
+        if (triggerConditions.activeOperations !== undefined && activeOpsCount < triggerConditions.activeOperations) return false;
+
+        const memberCount = chapter.members.length;
+        if (triggerConditions.familyMembers !== undefined && memberCount < triggerConditions.familyMembers) return false;
+
+        // Check level requirements
+        if (triggerConditions.minLevel !== undefined && player.level < triggerConditions.minLevel) return false;
+        if (triggerConditions.maxLevel !== undefined && player.level > triggerConditions.maxLevel) return false;
+
+        // Check cooldown
+        if (triggerConditions.cooldown && event.lastTriggered) {
+            const timeSinceLastTrigger = (Date.now() - event.lastTriggered) / 1000 / 60; // minutes
+            if (timeSinceLastTrigger < triggerConditions.cooldown) return false;
+        }
+
+        return true;
+    }, []);
+
+    /**
+     * Check and trigger events based on game state
+     */
+    const checkEventTriggers = useCallback(() => {
+        setState((prev) => {
+            const now = Date.now();
+            const newlyTriggeredEvents: string[] = [];
+
+            prev.randomEvents.forEach((event) => {
+                // Skip if already triggered or resolved
+                if (event.triggered || event.resolved) return;
+
+                // Check if conditions are met
+                if (!checkEventConditions(event, prev)) return;
+
+                // Roll for probability
+                const roll = Math.random() * 100;
+                if (roll > event.triggerConditions.probability) return;
+
+                // Trigger the event
+                newlyTriggeredEvents.push(event.id);
+            });
+
+            if (newlyTriggeredEvents.length === 0) return prev;
+
+            // Update events
+            const updatedEvents = prev.randomEvents.map(event =>
+                newlyTriggeredEvents.includes(event.id)
+                    ? { ...event, triggered: true, triggeredAt: now, lastTriggered: now }
+                    : event
+            );
+
+            return {
+                ...prev,
+                randomEvents: updatedEvents,
+                activeEvents: [...prev.activeEvents, ...newlyTriggeredEvents],
+                eventStats: {
+                    ...prev.eventStats,
+                    totalTriggered: prev.eventStats.totalTriggered + newlyTriggeredEvents.length,
+                },
+            };
+        });
+    }, [setState, checkEventConditions]);
+
+    /**
+     * Manually trigger a specific event (for testing or special cases)
+     */
+    const triggerEvent = useCallback((eventId: string) => {
+        setState((prev) => {
+            const event = prev.randomEvents.find(e => e.id === eventId);
+            if (!event || event.triggered) return prev;
+
+            const now = Date.now();
+            const updatedEvents = prev.randomEvents.map(e =>
+                e.id === eventId
+                    ? { ...e, triggered: true, triggeredAt: now, lastTriggered: now }
+                    : e
+            );
+
+            return {
+                ...prev,
+                randomEvents: updatedEvents,
+                activeEvents: [...prev.activeEvents, eventId],
+                eventStats: {
+                    ...prev.eventStats,
+                    totalTriggered: prev.eventStats.totalTriggered + 1,
+                    byType: {
+                        ...prev.eventStats.byType,
+                        [event.type]: prev.eventStats.byType[event.type] + 1,
+                    },
+                },
+            };
+        });
+    }, [setState]);
+
+    /**
+     * Resolve an event with a chosen action
+     */
+    const resolveEvent = useCallback((eventId: string, choiceId: string) => {
+        setState((prev) => {
+            const event = prev.randomEvents.find(e => e.id === eventId);
+            if (!event || !event.triggered || event.resolved) return prev;
+
+            const choice = event.choices.find(c => c.id === choiceId);
+            if (!choice) return prev;
+
+            // Determine success/failure
+            const roll = Math.random() * 100;
+            const success = choice.successChance === undefined || roll <= choice.successChance;
+            const consequences = success ? choice.successConsequences : (choice.failureConsequences || choice.successConsequences);
+
+            // Apply consequences
+            let newState = { ...prev };
+            const now = Date.now();
+
+            // Resource changes
+            if (consequences.kontanterChange) {
+                newState.player = {
+                    ...newState.player,
+                    kontanter: Math.max(0, newState.player.kontanter + consequences.kontanterChange),
+                };
+            }
+            if (consequences.respektChange) {
+                newState.player = {
+                    ...newState.player,
+                    respekt: Math.max(0, newState.player.respekt + consequences.respektChange),
+                };
+            }
+            if (consequences.inflytandeChange) {
+                newState.player = {
+                    ...newState.player,
+                    inflytande: Math.max(0, newState.player.inflytande + consequences.inflytandeChange),
+                };
+            }
+            if (consequences.heatChange) {
+                newState.player = {
+                    ...newState.player,
+                    polisbevakning: Math.max(0, Math.min(100, newState.player.polisbevakning + consequences.heatChange)),
+                };
+            }
+            if (consequences.experienceChange) {
+                newState.player = {
+                    ...newState.player,
+                    experience: newState.player.experience + consequences.experienceChange,
+                };
+            }
+
+            // Gang relations
+            if (consequences.gangHostilityChange) {
+                newState.rivalGangs = newState.rivalGangs.map(gang =>
+                    consequences.gangHostilityChange?.[gang.id]
+                        ? { ...gang, hostility: Math.max(-100, Math.min(100, gang.hostility + consequences.gangHostilityChange[gang.id])) }
+                        : gang
+                );
+            }
+
+            // Operations shutdown
+            if (consequences.operationsShutdown) {
+                // This would require additional state management
+                // For now, just note it in the event
+            }
+
+            // Update event status
+            newState.randomEvents = newState.randomEvents.map(e =>
+                e.id === eventId
+                    ? { ...e, resolved: true, resolvedAt: now, choiceSelected: choiceId, success }
+                    : e
+            );
+
+            // Remove from active events
+            newState.activeEvents = newState.activeEvents.filter(id => id !== eventId);
+
+            // Update event stats
+            const historyEntry = {
+                eventId: event.id,
+                type: event.type,
+                title: event.title,
+                triggeredAt: event.triggeredAt || now,
+                resolvedAt: now,
+                choiceId,
+                choiceLabel: choice.label,
+                success,
+                consequences,
+            };
+
+            newState.eventStats = {
+                ...newState.eventStats,
+                totalResolved: newState.eventStats.totalResolved + 1,
+                successfulOutcomes: success ? newState.eventStats.successfulOutcomes + 1 : newState.eventStats.successfulOutcomes,
+                failedOutcomes: !success ? newState.eventStats.failedOutcomes + 1 : newState.eventStats.failedOutcomes,
+                recentEvents: [historyEntry, ...newState.eventStats.recentEvents].slice(0, 10), // Keep last 10
+            };
+
+            return newState;
+        });
+    }, [setState]);
+
+    /**
+     * Dismiss an event without taking action
+     */
+    const dismissEvent = useCallback((eventId: string) => {
+        setState((prev) => ({
+            ...prev,
+            randomEvents: prev.randomEvents.map(e =>
+                e.id === eventId
+                    ? { ...e, resolved: true, resolvedAt: Date.now() }
+                    : e
+            ),
+            activeEvents: prev.activeEvents.filter(id => id !== eventId),
+        }));
+    }, [setState]);
+
     // ===== Family Management =====
 
     const addMember = useCallback((member: FamilyMember) => {
@@ -1331,6 +1724,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         attackGang,
         negotiateWithGang,
         generateGangEvents,
+        triggerEvent,
+        resolveEvent,
+        dismissEvent,
+        checkEventTriggers,
         saveGame,
         loadGame,
         resetGame,
