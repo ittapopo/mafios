@@ -1,7 +1,7 @@
 # Development Roadmap - Updated Strategic Plan
 
-**Last Updated:** 2025-10-22
-**Current Status:** Phase 2 Complete (75% of core gameplay functional)
+**Last Updated:** 2025-10-25
+**Current Status:** Phase 3.1 & 3.2 Complete (Business & Rival Gangs functional)
 
 ---
 
@@ -20,6 +20,10 @@
 - ✅ 2.3 Defense Route (security upgrades, heat reduction)
 - ✅ 2.4 Equipment System (buy/sell/equip, rarity-based pricing, inventory)
 - ✅ 2.5 Operations Center (6 operations, start/stop, upgrade, member assignment, passive income)
+
+### Phase 3: Game Entities & Features (IN PROGRESS)
+- ✅ 3.1 Business Management System (purchase, upgrade, assign managers, passive income)
+- ✅ 3.2 Rival Gangs & Conflicts (4 Nordic MCs, dynamic events, diplomacy, combat)
 
 ---
 
@@ -80,12 +84,42 @@
 }
 ```
 
+### Business Entity ✅ COMPLETE
+```typescript
+{
+  id, name, type, location, description,
+  owned, purchasePrice, level, maxLevel,
+  incomePerTick, upgradeCost,
+  managerId, heatLevel, crime
+}
+```
+
+### Rival Gang Entity ✅ COMPLETE
+```typescript
+{
+  id, name, logo, description,
+  strength, memberCount, wealth, territories,
+  hostility, relationStatus, aggressiveness,
+  lastAttack
+}
+```
+
+### Gang Event Entity ✅ COMPLETE
+```typescript
+{
+  id, type, gangId, timestamp, resolved,
+  title, description,
+  targetTerritoryId, strengthRequired,
+  cashDemand, kontanterChange, respektChange, hostilityChange
+}
+```
+
 ---
 
 ## 🎯 Phase 3: Complete Remaining Game Entities (PRIORITY)
 **Goal:** Finish all gameplay features before database integration
 
-### 3.1 Business Management System ⏳ NEW
+### 3.1 Business Management System ✅ COMPLETE
 **Priority:** P1 - High
 **Effort:** 3-4 days
 
@@ -135,7 +169,7 @@ interface Business {
 
 ---
 
-### 3.2 Rival Gangs & Conflicts ⏳ NEW
+### 3.2 Rival Gangs & Conflicts ✅ COMPLETE
 **Priority:** P1 - High
 **Effort:** 4-5 days
 
@@ -491,8 +525,8 @@ interface PlayerSkills {
 
 **Phase 1:** ✅✅✅✅✅ (100%)
 **Phase 2:** ✅✅✅✅✅ (100%)
-**Phase 3:** ⬜⬜⬜⬜⬜ (0%)
+**Phase 3:** ✅✅⬜⬜⬜ (40% - 2/5 complete)
 **Phase 4:** ⬜⬜⬜⬜⬜ (0%)
 **Phase 5:** ⬜⬜⬜⬜⬜ (0%)
 
-**Overall:** 40% Complete
+**Overall:** 48% Complete
