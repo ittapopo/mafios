@@ -55,3 +55,15 @@ export interface BusinessStats {
     totalIncome: number;
     totalLaunderingCapacity: number;
 }
+
+/**
+ * Crime operations - illegal activities that generate income
+ */
+export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Very High';
+
+export interface Crime {
+    name: string;
+    duration: number; // seconds
+    reward: number; // SEK
+    risk: RiskLevel;
+}

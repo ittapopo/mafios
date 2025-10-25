@@ -111,6 +111,204 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         return () => clearInterval(saveInterval);
     }, []);
 
+    // Gang event generation every 2-5 minutes (randomized)
+    useEffect(() => {
+        let currentTimeout: NodeJS.Timeout;
+
+        const generateNextGangEvent = () => {
+            // Random interval between 2-5 minutes (120000-300000 ms)
+            const randomInterval = 120000 + Math.random() * 180000;
+
+            currentTimeout = setTimeout(() => {
+                // Generate gang events inline to avoid dependency issues
+                setState((prev) => {
+                    const newEvents: typeof prev.gangEvents = [];
+                    const now = Date.now();
+
+                    // Iterate through each gang to potentially generate events
+                    prev.rivalGangs.forEach((gang) => {
+                        // Skip if gang has recent activity
+                        if (gang.lastAttack && now - gang.lastAttack < 300000) return; // 5 min cooldown
+
+                        // Calculate event probability based on hostility and aggressiveness
+                        const baseChance = gang.aggressiveness;
+                        const hostilityModifier = gang.hostility < 0 ? Math.abs(gang.hostility) / 2 : -gang.hostility / 4;
+                        const eventProbability = Math.max(0, Math.min(100, baseChance + hostilityModifier));
+
+                        // Roll for event generation
+                        if (Math.random() * 100 > eventProbability) return;
+
+                        // Determine event type based on relationship
+                        let eventType: 'attack' | 'raid' | 'challenge' | 'offer' | 'peace_offer' | 'betrayal';
+                        const roll = Math.random() * 100;
+
+                        if (gang.relationStatus === 'Hostile') {
+                            if (roll < 50) eventType = 'attack';
+                            else if (roll < 80) eventType = 'raid';
+                            else eventType = 'challenge';
+                        } else if (gang.relationStatus === 'Allied') {
+                            if (roll < 70) eventType = 'offer';
+                            else if (gang.hostility < 50) eventType = 'betrayal';
+                            else return;
+                        } else if (gang.relationStatus === 'Truce') {
+                            if (roll < 40) eventType = 'peace_offer';
+                            else if (gang.hostility < -10) eventType = 'attack';
+                            else return;
+                        } else {
+                            if (roll < 30) eventType = 'challenge';
+                            else if (roll < 60) eventType = 'offer';
+                            else eventType = 'attack';
+                        }
+
+                        // Select random player territory for attacks/raids
+                        const playerTerritories = prev.territories.filter(t => t.status === 'Controlled');
+                        const targetTerritory = playerTerritories.length > 0
+                            ? playerTerritories[Math.floor(Math.random() * playerTerritories.length)]
+                            : undefined;
+
+                        // Create event based on type
+                        let event: typeof prev.gangEvents[0] | null = null;
+
+                        switch (eventType) {
+                            case 'attack':
+                                event = {
+                                    id: `event-${now}-${gang.id}`,
+                                    type: 'attack',
+                                    gangId: gang.id,
+                                    timestamp: now,
+                                    targetTerritoryId: targetTerritory?.id,
+                                    resolved: false,
+                                    title: `${gang.name} Territory Attack!`,
+                                    description: targetTerritory
+                                        ? `${gang.name} is attacking ${targetTerritory.name}! Defend your territory or risk losing control.`
+                                        : `${gang.name} is threatening your operations. Respond quickly!`,
+                                    strengthRequired: gang.strength * 0.8,
+                                    respektChange: -10,
+                                    hostilityChange: -15,
+                                };
+                                break;
+
+                            case 'raid':
+                                const raidDemand = Math.floor(gang.wealth * 0.3);
+                                event = {
+                                    id: `event-${now}-${gang.id}`,
+                                    type: 'raid',
+                                    gangId: gang.id,
+                                    timestamp: now,
+                                    resolved: false,
+                                    title: `${gang.name} Business Raid`,
+                                    description: `${gang.name} is raiding one of your businesses! Pay ${raidDemand} kr or fight back.`,
+                                    cashDemand: raidDemand,
+                                    strengthRequired: gang.strength * 0.6,
+                                    kontanterChange: -raidDemand,
+                                    respektChange: -5,
+                                    hostilityChange: -10,
+                                };
+                                break;
+
+                            case 'challenge':
+                                event = {
+                                    id: `event-${now}-${gang.id}`,
+                                    type: 'challenge',
+                                    gangId: gang.id,
+                                    timestamp: now,
+                                    resolved: false,
+                                    title: `${gang.name} Issues Challenge`,
+                                    description: `${gang.name} has challenged your crew to prove your strength. Win for respect, lose for shame.`,
+                                    strengthRequired: gang.strength,
+                                    respektChange: 15,
+                                    hostilityChange: gang.hostility < 0 ? 10 : -5,
+                                };
+                                break;
+
+                            case 'offer':
+                                const offerAmount = Math.floor(gang.wealth * 0.2);
+                                event = {
+                                    id: `event-${now}-${gang.id}`,
+                                    type: 'offer',
+                                    gangId: gang.id,
+                                    timestamp: now,
+                                    resolved: false,
+                                    title: `${gang.name} Business Proposal`,
+                                    description: `${gang.name} offers a partnership deal worth ${offerAmount} kr. Accept to improve relations.`,
+                                    kontanterChange: offerAmount,
+                                    hostilityChange: 20,
+                                    respektChange: 5,
+                                };
+                                break;
+
+                            case 'peace_offer':
+                                event = {
+                                    id: `event-${now}-${gang.id}`,
+                                    type: 'peace_offer',
+                                    gangId: gang.id,
+                                    timestamp: now,
+                                    resolved: false,
+                                    title: `${gang.name} Seeks Peace`,
+                                    description: `${gang.name} wants to improve relations. Accept their peace offering?`,
+                                    hostilityChange: 30,
+                                    respektChange: 3,
+                                };
+                                break;
+
+                            case 'betrayal':
+                                event = {
+                                    id: `event-${now}-${gang.id}`,
+                                    type: 'betrayal',
+                                    gangId: gang.id,
+                                    timestamp: now,
+                                    targetTerritoryId: targetTerritory?.id,
+                                    resolved: false,
+                                    title: `${gang.name} BETRAYAL!`,
+                                    description: `${gang.name} has turned on you! They're attacking ${targetTerritory?.name || 'your operations'} despite your alliance.`,
+                                    strengthRequired: gang.strength * 0.9,
+                                    respektChange: -15,
+                                    kontanterChange: -50000,
+                                    hostilityChange: -80,
+                                };
+                                break;
+                        }
+
+                        if (event) {
+                            newEvents.push(event);
+                        }
+                    });
+
+                    // Add new events if any were generated
+                    if (newEvents.length === 0) return prev;
+
+                    const updatedGangEvents = [...prev.gangEvents, ...newEvents];
+                    const updatedActiveGangEvents = [...prev.activeGangEvents, ...newEvents.map(e => e.id)];
+
+                    // Update gang last attack times
+                    const updatedGangs = prev.rivalGangs.map(gang => {
+                        const hasNewEvent = newEvents.some(e => e.gangId === gang.id);
+                        return hasNewEvent ? { ...gang, lastAttack: now } : gang;
+                    });
+
+                    return {
+                        ...prev,
+                        gangEvents: updatedGangEvents,
+                        activeGangEvents: updatedActiveGangEvents,
+                        rivalGangs: updatedGangs,
+                        gangStats: {
+                            ...prev.gangStats,
+                            activeEvents: updatedActiveGangEvents.length,
+                        },
+                    };
+                });
+
+                generateNextGangEvent(); // Schedule next event
+            }, randomInterval);
+        };
+
+        generateNextGangEvent();
+
+        return () => {
+            if (currentTimeout) clearTimeout(currentTimeout);
+        };
+    }, [setState]);
+
     // Passive income from territories, operations, and businesses every 60 seconds
     useEffect(() => {
         const incomeInterval = setInterval(() => {
@@ -727,7 +925,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
             if (event.hostilityChange) {
                 newState.rivalGangs = newState.rivalGangs.map(g =>
                     g.id === event.gangId
-                        ? { ...g, hostility: Math.max(-100, Math.min(100, g.hostility + event.hostilityChange)) }
+                        ? { ...g, hostility: Math.max(-100, Math.min(100, g.hostility + (event.hostilityChange || 0))) }
                         : g
                 );
             }
@@ -846,6 +1044,193 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         return success;
     }, [setState]);
 
+    /**
+     * Generate random gang events based on gang aggressiveness and relationship
+     * Called periodically to create dynamic gang interactions
+     */
+    const generateGangEvents = useCallback(() => {
+        setState((prev) => {
+            const newEvents: typeof prev.gangEvents = [];
+            const now = Date.now();
+
+            // Iterate through each gang to potentially generate events
+            prev.rivalGangs.forEach((gang) => {
+                // Skip if gang has recent activity
+                if (gang.lastAttack && now - gang.lastAttack < 300000) return; // 5 min cooldown
+
+                // Calculate event probability based on hostility and aggressiveness
+                const baseChance = gang.aggressiveness;
+                const hostilityModifier = gang.hostility < 0 ? Math.abs(gang.hostility) / 2 : -gang.hostility / 4;
+                const eventProbability = Math.max(0, Math.min(100, baseChance + hostilityModifier));
+
+                // Roll for event generation
+                if (Math.random() * 100 > eventProbability) return;
+
+                // Determine event type based on relationship
+                let eventType: 'attack' | 'raid' | 'challenge' | 'offer' | 'peace_offer' | 'betrayal';
+                const roll = Math.random() * 100;
+
+                if (gang.relationStatus === 'Hostile') {
+                    // Hostile gangs: attacks, raids, challenges
+                    if (roll < 50) eventType = 'attack';
+                    else if (roll < 80) eventType = 'raid';
+                    else eventType = 'challenge';
+                } else if (gang.relationStatus === 'Allied') {
+                    // Allied gangs: offers, potential betrayals
+                    if (roll < 70) eventType = 'offer';
+                    else if (gang.hostility < 50) eventType = 'betrayal'; // Low hostility allies might betray
+                    else return; // Skip event for stable allies
+                } else if (gang.relationStatus === 'Truce') {
+                    // Truce gangs: peace offers, potential attacks if relations sour
+                    if (roll < 40) eventType = 'peace_offer';
+                    else if (gang.hostility < -10) eventType = 'attack';
+                    else return;
+                } else {
+                    // Neutral gangs: mix of events
+                    if (roll < 30) eventType = 'challenge';
+                    else if (roll < 60) eventType = 'offer';
+                    else eventType = 'attack';
+                }
+
+                // Select random player territory for attacks/raids
+                const playerTerritories = prev.territories.filter(t => t.status === 'Controlled');
+                const targetTerritory = playerTerritories.length > 0
+                    ? playerTerritories[Math.floor(Math.random() * playerTerritories.length)]
+                    : undefined;
+
+                // Create event based on type
+                let event: typeof prev.gangEvents[0] | null = null;
+
+                switch (eventType) {
+                    case 'attack':
+                        event = {
+                            id: `event-${now}-${gang.id}`,
+                            type: 'attack',
+                            gangId: gang.id,
+                            timestamp: now,
+                            targetTerritoryId: targetTerritory?.id,
+                            resolved: false,
+                            title: `${gang.name} Territory Attack!`,
+                            description: targetTerritory
+                                ? `${gang.name} is attacking ${targetTerritory.name}! Defend your territory or risk losing control.`
+                                : `${gang.name} is threatening your operations. Respond quickly!`,
+                            strengthRequired: gang.strength * 0.8,
+                            respektChange: -10,
+                            hostilityChange: -15,
+                        };
+                        break;
+
+                    case 'raid':
+                        const raidDemand = Math.floor(gang.wealth * 0.3);
+                        event = {
+                            id: `event-${now}-${gang.id}`,
+                            type: 'raid',
+                            gangId: gang.id,
+                            timestamp: now,
+                            resolved: false,
+                            title: `${gang.name} Business Raid`,
+                            description: `${gang.name} is raiding one of your businesses! Pay ${raidDemand} kr or fight back.`,
+                            cashDemand: raidDemand,
+                            strengthRequired: gang.strength * 0.6,
+                            kontanterChange: -raidDemand,
+                            respektChange: -5,
+                            hostilityChange: -10,
+                        };
+                        break;
+
+                    case 'challenge':
+                        event = {
+                            id: `event-${now}-${gang.id}`,
+                            type: 'challenge',
+                            gangId: gang.id,
+                            timestamp: now,
+                            resolved: false,
+                            title: `${gang.name} Issues Challenge`,
+                            description: `${gang.name} has challenged your crew to prove your strength. Win for respect, lose for shame.`,
+                            strengthRequired: gang.strength,
+                            respektChange: 15,
+                            hostilityChange: gang.hostility < 0 ? 10 : -5,
+                        };
+                        break;
+
+                    case 'offer':
+                        const offerAmount = Math.floor(gang.wealth * 0.2);
+                        event = {
+                            id: `event-${now}-${gang.id}`,
+                            type: 'offer',
+                            gangId: gang.id,
+                            timestamp: now,
+                            resolved: false,
+                            title: `${gang.name} Business Proposal`,
+                            description: `${gang.name} offers a partnership deal worth ${offerAmount} kr. Accept to improve relations.`,
+                            kontanterChange: offerAmount,
+                            hostilityChange: 20,
+                            respektChange: 5,
+                        };
+                        break;
+
+                    case 'peace_offer':
+                        event = {
+                            id: `event-${now}-${gang.id}`,
+                            type: 'peace_offer',
+                            gangId: gang.id,
+                            timestamp: now,
+                            resolved: false,
+                            title: `${gang.name} Seeks Peace`,
+                            description: `${gang.name} wants to improve relations. Accept their peace offering?`,
+                            hostilityChange: 30,
+                            respektChange: 3,
+                        };
+                        break;
+
+                    case 'betrayal':
+                        event = {
+                            id: `event-${now}-${gang.id}`,
+                            type: 'betrayal',
+                            gangId: gang.id,
+                            timestamp: now,
+                            targetTerritoryId: targetTerritory?.id,
+                            resolved: false,
+                            title: `${gang.name} BETRAYAL!`,
+                            description: `${gang.name} has turned on you! They're attacking ${targetTerritory?.name || 'your operations'} despite your alliance.`,
+                            strengthRequired: gang.strength * 0.9,
+                            respektChange: -15,
+                            kontanterChange: -50000,
+                            hostilityChange: -80,
+                        };
+                        break;
+                }
+
+                if (event) {
+                    newEvents.push(event);
+                }
+            });
+
+            // Add new events if any were generated
+            if (newEvents.length === 0) return prev;
+
+            const updatedGangEvents = [...prev.gangEvents, ...newEvents];
+            const updatedActiveGangEvents = [...prev.activeGangEvents, ...newEvents.map(e => e.id)];
+
+            // Update gang last attack times
+            const updatedGangs = prev.rivalGangs.map(gang => {
+                const hasNewEvent = newEvents.some(e => e.gangId === gang.id);
+                return hasNewEvent ? { ...gang, lastAttack: now } : gang;
+            });
+
+            return {
+                ...prev,
+                gangEvents: updatedGangEvents,
+                activeGangEvents: updatedActiveGangEvents,
+                rivalGangs: updatedGangs,
+                gangStats: {
+                    ...prev.gangStats,
+                    activeEvents: updatedActiveGangEvents.length,
+                },
+            };
+        });
+    }, [setState]);
+
     // ===== Family Management =====
 
     const addMember = useCallback((member: FamilyMember) => {
@@ -945,6 +1330,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         resolveGangEvent,
         attackGang,
         negotiateWithGang,
+        generateGangEvents,
         saveGame,
         loadGame,
         resetGame,

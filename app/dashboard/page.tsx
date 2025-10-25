@@ -12,6 +12,7 @@ import FamilyContent from './family-content/family-content';
 import { BusinessContent } from './business-content/business-content';
 import { TerritoryContent } from './territory-content/territory-content';
 import { DefenseContent } from './defense-content/defense-content';
+import { RivalGangsContent } from './rival-gangs-content/rival-gangs-content';
 import { RouteProvider, useRoute, GameProvider } from '../lib/contexts';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
@@ -38,6 +39,8 @@ const DashboardContent: React.FC = () => {
                 return <TerritoryContent />;
             case '/defense':
                 return <DefenseContent />;
+            case '/rival-gangs':
+                return <RivalGangsContent />;
             default:
                 return <CharacterContent />;
         }
