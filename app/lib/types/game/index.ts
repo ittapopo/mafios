@@ -8,4 +8,5 @@ export * from './business';
 export * from './family';
 export * from './territory';
 export * from './gang';
+export * from './events';
 export * from './state';

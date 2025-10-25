@@ -10,6 +10,7 @@ import { Operation } from './headquarters';
 import { EquipmentItemType, MaterialStatus, EquipmentSlot } from './character';
 import { Business, BusinessStats } from './business';
 import { RivalGang, GangEvent, GangStats } from './gang';
+import { GameEvent, EventStats, EventHistoryEntry } from './events';
 
 /**
  * Player statistics and resources
@@ -66,10 +67,16 @@ export interface GameState {
     gangEvents: GangEvent[];
     activeGangEvents: string[]; // IDs of unresolved events
 
+    // Random Events
+    randomEvents: GameEvent[];
+    activeEvents: string[]; // IDs of unresolved events
+    eventHistory: EventHistoryEntry[];
+
     // Stats
     territoryStats: TerritoryStats;
     businessStats: BusinessStats;
     gangStats: GangStats;
+    eventStats: EventStats;
 
     // Metadata
     lastSaved: number; // timestamp
@@ -129,6 +136,12 @@ export interface GameActions {
     negotiateWithGang: (gangId: string, offer: 'truce' | 'alliance' | 'payment') => boolean;
     generateGangEvents: () => void;
 
+    // Random Events
+    triggerEvent: (eventId: string) => void;
+    resolveEvent: (eventId: string, choiceId: string) => void;
+    dismissEvent: (eventId: string) => void;
+    checkEventTriggers: () => void;
+
     // Persistence
     saveGame: () => void;
     loadGame: () => void;
@@ -166,6 +179,9 @@ export const DEFAULT_GAME_STATE: GameState = {
     rivalGangs: [],
     gangEvents: [],
     activeGangEvents: [],
+    randomEvents: [],
+    activeEvents: [],
+    eventHistory: [],
     territoryStats: {
         totalTerritories: 12,
         controlledTerritories: 0,
@@ -184,6 +200,25 @@ export const DEFAULT_GAME_STATE: GameState = {
         alliedGangs: 0,
         activeEvents: 0,
         territoriesLostToGangs: 0,
+    },
+    eventStats: {
+        totalTriggered: 0,
+        totalResolved: 0,
+        successfulOutcomes: 0,
+        failedOutcomes: 0,
+        byType: {
+            police_raid: 0,
+            opportunity: 0,
+            member_issue: 0,
+            rival_incident: 0,
+            informant: 0,
+            betrayal: 0,
+            market_shift: 0,
+            territory_threat: 0,
+            lucky_break: 0,
+            inspection: 0,
+        },
+        recentEvents: [],
     },
     lastSaved: Date.now(),
     playTime: 0,
