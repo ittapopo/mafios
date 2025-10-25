@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Home, User, Users, Briefcase, Map, Shield } from "lucide-react";
+import { Home, User, Users, Briefcase, Map, Shield, Swords } from "lucide-react";
 import { NavigationItem } from "../../../components/navigation/navigation-item";
 import { NavItem } from '@/app/lib/types';
 import { useRoute } from '@/app/lib/contexts';
@@ -13,6 +13,7 @@ const navigationItems: NavItem[] = [
     { icon: <Briefcase />, label: "Business", route: "/business" },
     { icon: <Map />, label: "Territory", route: "/territory" },
     { icon: <Shield />, label: "Defense", route: "/defense" },
+    { icon: <Swords />, label: "Rival Gangs", route: "/rival-gangs" },
 ];
 
 interface LeftNavigationBarProps {

@@ -5,10 +5,8 @@ import { Shield } from "lucide-react";
 import { useGameState } from "@/app/lib/hooks";
 
 export const SecurityStatus = () => {
-    const { state } = useGameState();
-
-    // Get security levels from game state or use defaults
-    const securityLevels: SecurityLevel[] = state.securityLevels || [
+    // TODO: Add securityLevels to GameState when implementing security upgrade system
+    const securityLevels: SecurityLevel[] = [
         {
             area: 'Clubhouse Perimeter',
             level: 3,

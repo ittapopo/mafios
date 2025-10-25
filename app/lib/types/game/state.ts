@@ -127,6 +127,7 @@ export interface GameActions {
     resolveGangEvent: (eventId: string, outcome: 'success' | 'failure' | 'negotiated') => void;
     attackGang: (gangId: string) => boolean;
     negotiateWithGang: (gangId: string, offer: 'truce' | 'alliance' | 'payment') => boolean;
+    generateGangEvents: () => void;
 
     // Persistence
     saveGame: () => void;
